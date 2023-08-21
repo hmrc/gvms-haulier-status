@@ -3,6 +3,8 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{integrationTestSettings, scalaSettings}
 import sbt.Keys.evictionErrorLevel
 
+val appName = "gvms-haulier-status"
+
 lazy val microservice = Project("gvms-haulier-status", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
