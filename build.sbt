@@ -1,6 +1,7 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{integrationTestSettings, scalaSettings}
+import sbt.Keys.evictionErrorLevel
 
 lazy val microservice = Project("gvms-haulier-status", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -23,3 +24,5 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
+
+evictionErrorLevel := Level.Warn
