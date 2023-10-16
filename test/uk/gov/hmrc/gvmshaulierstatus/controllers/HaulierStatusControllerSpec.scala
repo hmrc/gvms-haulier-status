@@ -91,7 +91,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
       val result: Future[Result] = controller.delete(correlationId)(fakeRequest)
 
       status(result)          shouldBe NOT_FOUND
-      contentAsString(result) should include(s"No entry with correlation id $correlationId found")
+      contentAsString(result) should include(s"No entry with correlation id ${correlationId.id} found")
 
       verify(mockHaulierStatusService).delete(mEq(correlationId))
     }
