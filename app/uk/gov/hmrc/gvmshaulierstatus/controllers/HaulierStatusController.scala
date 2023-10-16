@@ -48,7 +48,7 @@ class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusServi
       .delete(correlationId)
       .fold(
         {
-          case CorrelationIdNotFound => NotFound(s"No entry with correlation id $correlationId found")
+          case CorrelationIdNotFound => NotFound(s"No entry with correlation id ${correlationId.id} found")
         },
         _ => Ok
       )
