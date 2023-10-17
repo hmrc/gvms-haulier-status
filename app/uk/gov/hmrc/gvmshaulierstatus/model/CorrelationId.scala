@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.controllers
+package uk.gov.hmrc.gvmshaulierstatus.model
 
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import play.api.libs.json._
+import play.api.mvc.PathBindable
 
-@Singleton()
-class MicroserviceHelloWorldController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
+case class CorrelationId(id: String)
 
-  def hello(): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok("Hello hello"))
-  }
+object CorrelationId {
+
+  implicit object declarationTypePathBindable
+      extends PathBindable.Parsing[CorrelationId](
+        CorrelationId.apply,
+        _.id,
+        (s, e) => s"Cannot parse parameter $s as CorrelationId: ${e.getMessage}"
+      )
+
+  implicit val format: OFormat[CorrelationId] = Json.format[CorrelationId]
 }

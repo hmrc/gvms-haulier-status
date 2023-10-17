@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.controllers
+package uk.gov.hmrc.gvmshaulierstatus
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import play.api.http.Status
-import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Helpers}
+import play.api.libs.json.{JsError, Json}
 
-class MicroserviceHelloWorldControllerSpec extends AnyWordSpec with Matchers {
+package object controllers {
 
-  private val fakeRequest = FakeRequest("GET", "/")
-  private val controller  = new MicroserviceHelloWorldController(Helpers.stubControllerComponents())
-
-  "GET /" should {
-    "return 200" in {
-      val result = controller.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
+  implicit class JsErrorLogger(val error: JsError) extends AnyVal {
+    def toLogFormat: String = Json.prettyPrint(JsError.toJson(error))
   }
 }
