@@ -21,6 +21,7 @@ import org.bson.codecs.Codec
 import org.mongodb.scala._
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model._
+import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
 import uk.gov.hmrc.mongo.MongoComponent
@@ -30,24 +31,28 @@ import uk.gov.hmrc.play.http.logging.Mdc
 
 import java.time.{Clock, Instant}
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.duration.SECONDS
 import scala.concurrent.{ExecutionContext, Future}
 
 @SuppressWarnings(Array("org.wartremover.warts.Any"))
 @Singleton
 class HaulierStatusRepository @Inject()(
-  mongo:                     MongoComponent
-)(implicit executionContext: ExecutionContext)
+  mongo:                     MongoComponent,
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig)
     extends PlayMongoRepository[HaulierStatusDocument](
       collectionName = "haulier-status",
       mongoComponent = mongo,
       domainFormat   = HaulierStatusDocument.mongoFormat,
       indexes = Seq(
         IndexModel(ascending("id"), IndexOptions().name("correlationId").unique(true).sparse(true)),
-        IndexModel(ascending("dateTime"), IndexOptions().name("dateTime").sparse(false)),
+        IndexModel(
+          ascending("dateTime"),
+          IndexOptions().name("haulier_status_dateTime").expireAfter(appConfig.expireAfterSeconds, SECONDS).sparse(false)),
       ),
       extraCodecs = Seq[Codec[_]](
         Codecs.playFormatCodec[HaulierStatusDocument](HaulierStatusDocument.mongoFormat)
-      )
+      ),
+      replaceIndexes = true
     ) {
 
   def findAndDelete(correlationId: CorrelationId): Future[Option[String]] =
