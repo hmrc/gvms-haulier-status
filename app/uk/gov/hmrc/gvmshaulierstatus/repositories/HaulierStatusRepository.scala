@@ -46,8 +46,8 @@ class HaulierStatusRepository @Inject()(
       indexes = Seq(
         IndexModel(ascending("id"), IndexOptions().name("correlationId").unique(true).sparse(true)),
         IndexModel(
-          ascending("dateTime"),
-          IndexOptions().name("haulier_status_dateTime").expireAfter(appConfig.expireAfterSeconds, SECONDS).sparse(false)),
+          ascending("createdAt"),
+          IndexOptions().name("haulier_status_createdAt").expireAfter(appConfig.expireAfterSeconds, SECONDS).sparse(false)),
       ),
       extraCodecs = Seq[Codec[_]](
         Codecs.playFormatCodec[HaulierStatusDocument](HaulierStatusDocument.mongoFormat)
