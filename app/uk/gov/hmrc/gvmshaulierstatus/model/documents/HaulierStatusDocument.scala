@@ -22,7 +22,7 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 
-case class HaulierStatusDocument(id: String, dateTime: Instant)
+case class HaulierStatusDocument(id: String, createdAt: Instant)
 
 object HaulierStatusDocument {
   val mongoFormat: OFormat[HaulierStatusDocument] = {
@@ -30,7 +30,7 @@ object HaulierStatusDocument {
 
     val read: Reads[HaulierStatusDocument] = (
       (JsPath \ "id").read[String] and
-        (JsPath \ "dateTime").read[Instant]
+        (JsPath \ "createdAt").read[Instant]
     )(HaulierStatusDocument.apply _)
 
     OFormat[HaulierStatusDocument](read, Json.writes[HaulierStatusDocument])
