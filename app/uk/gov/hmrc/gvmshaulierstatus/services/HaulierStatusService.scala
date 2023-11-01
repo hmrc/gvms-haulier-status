@@ -19,15 +19,23 @@ package uk.gov.hmrc.gvmshaulierstatus.services
 import cats.data.EitherT
 import cats.implicits._
 import org.mongodb.scala.MongoWriteException
+import play.api.Logging
+import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
+import uk.gov.hmrc.gvmshaulierstatus.connector.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound, CreateHaulierStatusError, DeleteHaulierStatusError}
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
+import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepository)(implicit ec: ExecutionContext) {
+class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepository, customsServiceStatusConnector: CustomsServiceStatusConnector)(
+  implicit ec:                                                ExecutionContext,
+  appConfig:                                                  AppConfig)
+    extends Logging {
 
   def create(correlationId: CorrelationId): EitherT[Future, CreateHaulierStatusError, String] =
     EitherT(
@@ -40,5 +48,15 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
 
   def delete(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
     EitherT.fromOptionF(haulierStatusRepository.findAndDelete(correlationId), CorrelationIdNotFound)
+
+  def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Future[HttpResponse]] =
+    haulierStatusRepository.findAllOlderThan(appConfig.notificationCheckSchedulerIntervalSeconds).map {
+      case Nil =>
+        logger.info("Setting haulier status to AVAILABLE")
+        customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, AVAILABLE)
+      case _ =>
+        logger.info("Setting haulier status to UNAVAILABLE")
+        customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, UNAVAILABLE)
+    }
 
 }

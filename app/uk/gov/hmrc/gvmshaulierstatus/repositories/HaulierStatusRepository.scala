@@ -19,6 +19,7 @@ package uk.gov.hmrc.gvmshaulierstatus.repositories
 import com.mongodb.client.model.Indexes.ascending
 import org.bson.codecs.Codec
 import org.mongodb.scala._
+import org.mongodb.scala.bson.BsonDateTime
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model._
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
@@ -54,6 +55,13 @@ class HaulierStatusRepository @Inject()(
       ),
       replaceIndexes = true
     ) {
+
+  def findAllOlderThan(seconds: Int): Future[Seq[HaulierStatusDocument]] =
+    Mdc.preservingMdc(
+      collection
+        .find(lt("createdAt", BsonDateTime(Instant.now(Clock.systemUTC()).minusSeconds(seconds).toEpochMilli)))
+        .toFuture()
+    )
 
   def findAndDelete(correlationId: CorrelationId): Future[Option[String]] =
     Mdc.preservingMdc(
