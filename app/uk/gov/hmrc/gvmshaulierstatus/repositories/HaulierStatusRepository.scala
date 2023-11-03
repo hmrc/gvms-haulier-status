@@ -71,10 +71,10 @@ class HaulierStatusRepository @Inject()(
         .map(_.map(_.id))
     )
 
-  def create(correlationId: CorrelationId): Future[String] =
+  def create(correlationId: CorrelationId)(implicit instant: Instant = Instant.now(Clock.systemUTC())): Future[String] =
     Mdc.preservingMdc(
       collection
-        .insertOne(HaulierStatusDocument(correlationId.id, Instant.now(Clock.systemUTC())))
+        .insertOne(HaulierStatusDocument(correlationId.id, instant))
         .toFuture()
         .map(_ => correlationId.id)
     )

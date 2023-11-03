@@ -38,17 +38,17 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
   "create" should {
     "successfully create if correlation id does not already exist" in new Setup {
-      val correlationId = CorrelationId("new-correlation-id")
+      val correlationId: CorrelationId = CorrelationId("new-correlation-id")
 
-      when(mockHaulierStatusRepository.create(mEq(correlationId))).thenReturn(Future.successful(correlationId.id))
+      when(mockHaulierStatusRepository.create(correlationId)).thenReturn(Future.successful(correlationId.id))
 
       service.create(correlationId).value.futureValue shouldBe Right(correlationId.id)
     }
 
     "return correlation id already exists if there is an existing entry with that id" in new Setup {
-      val correlationId = CorrelationId("pre-existing-correlation-id")
+      val correlationId: CorrelationId = CorrelationId("pre-existing-correlation-id")
 
-      when(mockHaulierStatusRepository.create(mEq(correlationId)))
+      when(mockHaulierStatusRepository.create(correlationId))
         .thenReturn(Future.failed(new MongoWriteException(new WriteError(-1, "", new BsonDocument()), new ServerAddress)))
 
       service.create(correlationId).value.futureValue shouldBe Left(CorrelationIdAlreadyExists)
@@ -57,7 +57,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
   "delete" should {
     "successfully delete if correlation id exists" in new Setup {
-      val correlationId = CorrelationId("pre-existing-correlation-id")
+      val correlationId: CorrelationId = CorrelationId("pre-existing-correlation-id")
 
       when(mockHaulierStatusRepository.findAndDelete(correlationId))
         .thenReturn(Future.successful(Some(correlationId.id)))
@@ -66,7 +66,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
     }
 
     "return correlation id not found if no entry with that id" in new Setup {
-      val correlationId = CorrelationId("non-existent-correlation-id")
+      val correlationId: CorrelationId = CorrelationId("non-existent-correlation-id")
 
       when(mockHaulierStatusRepository.findAndDelete(correlationId))
         .thenReturn(Future.successful(None))

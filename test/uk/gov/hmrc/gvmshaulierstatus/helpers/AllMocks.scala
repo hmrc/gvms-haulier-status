@@ -19,7 +19,7 @@ package uk.gov.hmrc.gvmshaulierstatus.helpers
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.gvmshaulierstatus.connector.CustomsServiceStatusConnector
+import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.gvmshaulierstatus.services.HaulierStatusService
 

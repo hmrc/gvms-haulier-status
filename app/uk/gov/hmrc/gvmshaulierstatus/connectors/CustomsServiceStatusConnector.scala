@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.connector
+package uk.gov.hmrc.gvmshaulierstatus.connectors
 
 import uk.gov.hmrc.gvmshaulierstatus.model.State
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}

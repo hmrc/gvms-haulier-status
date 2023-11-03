@@ -21,7 +21,7 @@ import cats.implicits._
 import org.mongodb.scala.MongoWriteException
 import play.api.Logging
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
-import uk.gov.hmrc.gvmshaulierstatus.connector.CustomsServiceStatusConnector
+import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound, CreateHaulierStatusError, DeleteHaulierStatusError}
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
