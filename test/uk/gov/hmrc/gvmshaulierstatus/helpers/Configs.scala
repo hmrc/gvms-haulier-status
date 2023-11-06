@@ -22,7 +22,6 @@ import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait Configs {
-  self: BaseSpec =>
 
   def configuration: Configuration = Configuration(ConfigFactory.parseResources("application.conf"))
 

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.gvmshaulierstatus.repositories
 
 import org.mongodb.scala.model.Filters
-import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseISpec
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
 import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
@@ -25,28 +24,28 @@ import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant}
 
-class HaulierStatusRepositoryISpec extends BaseISpec {
+class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierStatusDocument] {
 
-  val haulierStatusRepository: HaulierStatusRepository = app.injector.instanceOf[HaulierStatusRepository]
+  override protected val repository: HaulierStatusRepository = new HaulierStatusRepository(mongoComponent)
 
   "findAndDelete" should {
     "return the id of the record after successfully deleting" in {
-      await(haulierStatusRepository.create(CorrelationId("corr-1"))(Instant.now(Clock.systemUTC())))
-      await(haulierStatusRepository.findAndDelete(CorrelationId("corr-1"))) shouldBe Some("corr-1")
+      await(insert(HaulierStatusDocument("corr-1", Instant.now(Clock.systemUTC()))))
+      await(repository.findAndDelete(CorrelationId("corr-1"))) shouldBe Some("corr-1")
 
-      await(haulierStatusRepository.collection.find(Filters.equal("id", "corr-1".toBson())).toFuture()).length shouldBe 0
+      await(repository.collection.find(Filters.equal("id", "corr-1".toBson())).toFuture()).length shouldBe 0
     }
 
     "return None when there is no record with that id" in {
-      await(haulierStatusRepository.findAndDelete(CorrelationId("corr-1"))) shouldBe None
+      await(repository.findAndDelete(CorrelationId("corr-1"))) shouldBe None
     }
   }
 
   "findOlderThan" should {
     "return only records older than the specified time" in {
-      await(haulierStatusRepository.create(CorrelationId("corr-1"))(Instant.now(Clock.systemUTC())))
-      await(haulierStatusRepository.create(CorrelationId("corr-2"))(Instant.now(Clock.systemUTC()).minusSeconds(21)))
-      inside(await(haulierStatusRepository.findAllOlderThan(20))) {
+      await(insert(HaulierStatusDocument("corr-1", Instant.now(Clock.systemUTC()))))
+      await(insert(HaulierStatusDocument("corr-2", Instant.now(Clock.systemUTC()).minusSeconds(21))))
+      inside(await(repository.findAllOlderThan(20))) {
         case Seq(document) => document.id shouldBe "corr-2"
       }
     }
@@ -55,9 +54,9 @@ class HaulierStatusRepositoryISpec extends BaseISpec {
   "create" should {
     "return correlation id after inserting new status record" in {
       val instant = Instant.now(Clock.systemUTC()).minusSeconds(5)
-      await(haulierStatusRepository.create(CorrelationId("corr-5"))(instant)) shouldBe "corr-5"
+      await(repository.create(CorrelationId("corr-5"))(instant)) shouldBe "corr-5"
 
-      inside(await(haulierStatusRepository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) {
+      inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) {
         case Seq(document) => document shouldBe HaulierStatusDocument("corr-5", instant.truncatedTo(ChronoUnit.MILLIS))
       }
     }

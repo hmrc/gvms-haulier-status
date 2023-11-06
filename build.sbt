@@ -1,5 +1,4 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import sbt.Keys.evictionErrorLevel
 
 lazy val microservice = Project("gvms-haulier-status", file("."))
@@ -18,8 +17,6 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
       "uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId"
     )
   )
-  .configs(IntegrationTest)
-  .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
 
