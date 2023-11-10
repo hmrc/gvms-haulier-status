@@ -18,14 +18,16 @@ package uk.gov.hmrc.gvmshaulierstatus.helpers
 
 import com.typesafe.config.ConfigFactory
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait Configs {
-  self: BaseSpec =>
 
   def configuration: Configuration = Configuration(ConfigFactory.parseResources("application.conf"))
 
   def environment: Environment = Environment.simple()
 
   def servicesConfig = new ServicesConfig(configuration)
+
+  implicit def applicationConfig: AppConfig = new AppConfig(configuration)
 }

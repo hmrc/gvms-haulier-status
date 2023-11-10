@@ -16,16 +16,21 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.config
 
-import play.api.Configuration
+import com.google.inject.{AbstractModule, Provides}
+import uk.gov.hmrc.gvmshaulierstatus.statusCheck.NotificationCheckScheduler
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Named
+import javax.inject.Singleton
 
-@Singleton
-class AppConfig @Inject()(val config: Configuration) {
+class Module extends AbstractModule {
 
-  val expireAfterSeconds:                            Int    = config.get[Int]("mongodb.haulier-status.expireAfterSeconds")
-  val notificationCheckSchedulerInitialDelaySeconds: Int    = config.get[Int]("notificationCheckScheduler.initialDelaySeconds")
-  val notificationCheckSchedulerIntervalSeconds:     Int    = config.get[Int]("notificationCheckScheduler.intervalSeconds")
-  val haulierServiceId:                              String = config.get[String]("service.id")
+  override def configure(): Unit =
+    bind(classOf[NotificationCheckScheduler]).asEagerSingleton()
 
+  @Provides
+  @Named("customsServiceStatusUrl")
+  @Singleton
+  def registerCustomsServiceStatusUrlProvider(servicesConfig: ServicesConfig): String =
+    servicesConfig.baseUrl("customs-service-status")
 }

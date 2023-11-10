@@ -19,16 +19,19 @@ package uk.gov.hmrc.gvmshaulierstatus.helpers
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
+import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.gvmshaulierstatus.services.HaulierStatusService
 
 trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
-  val mockHaulierStatusRepository: HaulierStatusRepository = mock[HaulierStatusRepository]
-  val mockHaulierStatusService:    HaulierStatusService    = mock[HaulierStatusService]
+  val mockCustomsServiceStatusConnector: CustomsServiceStatusConnector = mock[CustomsServiceStatusConnector]
+  val mockHaulierStatusRepository:       HaulierStatusRepository       = mock[HaulierStatusRepository]
+  val mockHaulierStatusService:          HaulierStatusService          = mock[HaulierStatusService]
 
   override protected def beforeEach(): Unit =
     Seq(
+      mockCustomsServiceStatusConnector,
       mockHaulierStatusRepository,
       mockHaulierStatusService
     ).foreach(Mockito.reset(_))

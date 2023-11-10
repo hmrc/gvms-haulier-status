@@ -1,8 +1,5 @@
-import play.core.PlayVersion
-import play.sbt.PlayImport._
-import sbt.Keys.libraryDependencies
-import sbt._
 import play.core.PlayVersion.current
+import sbt.*
 
 object AppDependencies {
 
@@ -16,11 +13,13 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % bootstrapVersion % "test, it",
+    "org.scalatest"          %% "scalatest"               % "3.2.15"         % Test,
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % bootstrapVersion % Test,
     "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % hmrcMongoVersion % Test,
-    "org.mockito"            % "mockito-core"             % "5.1.1"          % "test, it",
+    "org.mockito"            % "mockito-core"             % "5.1.1"          % Test,
     "com.typesafe.play"      %% "play-test"               % current          % Test,
-    "org.scalatestplus"      %% "mockito-3-4"             % "3.2.10.0"       % "test, it",
-    "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"          % "test, it",
+    "org.scalatestplus"      %% "mockito-3-4"             % "3.2.10.0"       % Test,
+    "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"          % Test,
+    "com.vladsch.flexmark"   % "flexmark-all"             % "0.64.4"         % Test,
   )
 }

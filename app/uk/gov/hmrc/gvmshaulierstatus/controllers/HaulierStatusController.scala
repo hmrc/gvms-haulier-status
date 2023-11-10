@@ -26,7 +26,7 @@ import uk.gov.hmrc.gvmshaulierstatus.services.HaulierStatusService
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-@Singleton()
+@Singleton
 class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusService, cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends BaseHaulierStatusController(cc) {
 
