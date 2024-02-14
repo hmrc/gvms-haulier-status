@@ -1,5 +1,6 @@
 .*
 
+!.sbtrc
 !.gitignore
 !.scalafmt.conf
 bin

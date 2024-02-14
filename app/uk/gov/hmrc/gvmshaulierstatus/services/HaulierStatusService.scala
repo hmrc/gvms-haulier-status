@@ -54,8 +54,9 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
       case Nil =>
         logger.info("Setting haulier status to AVAILABLE")
         customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, AVAILABLE)
-      case _ =>
-        logger.info("Setting haulier status to UNAVAILABLE")
+      case correlationIds =>
+        logger.warn("Setting haulier status to UNAVAILABLE")
+        logger.info(s"${correlationIds.length} Correlation ids found (curtailed): ${correlationIds.takeRight(10).mkString(", ")}")
         customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, UNAVAILABLE)
     }
 
