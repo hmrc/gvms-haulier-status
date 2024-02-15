@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.statusCheck
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.services.HaulierStatusService
 import uk.gov.hmrc.http.HeaderCarrier
