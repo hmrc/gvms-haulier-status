@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.controllers
 
+import org.slf4j.MDC
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
@@ -30,8 +31,11 @@ import scala.concurrent.ExecutionContext
 class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusService, cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends BaseHaulierStatusController(cc) {
 
+  private val correlationIdHeader = "X-Correlation-Id"
+
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     validateJson[CorrelationId] { correlationId =>
+      MDC.put(correlationIdHeader, correlationId.id)
       haulierStatusService
         .create(correlationId)
         .fold(
@@ -44,6 +48,7 @@ class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusServi
   }
 
   def delete(correlationId: CorrelationId): Action[AnyContent] = Action.async { implicit request =>
+    MDC.put(correlationIdHeader, correlationId.id)
     haulierStatusService
       .delete(correlationId)
       .fold(
