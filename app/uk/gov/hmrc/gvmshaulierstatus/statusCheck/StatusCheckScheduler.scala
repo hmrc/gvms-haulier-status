@@ -27,7 +27,7 @@ import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 @Singleton
-class NotificationCheckScheduler @Inject()(
+class StatusCheckScheduler @Inject()(
   actorSystem:               ActorSystem,
   haulierStatusService:      HaulierStatusService
 )(implicit executionContext: ExecutionContext, appConfig: AppConfig) {
@@ -35,8 +35,8 @@ class NotificationCheckScheduler @Inject()(
   implicit private val headerCarrier: HeaderCarrier = HeaderCarrier()
 
   actorSystem.scheduler.scheduleAtFixedRate(
-    initialDelay = appConfig.notificationCheckSchedulerInitialDelaySeconds seconds,
-    interval     = appConfig.notificationCheckSchedulerIntervalSeconds seconds
+    initialDelay = appConfig.initialDelaySeconds.seconds,
+    interval     = appConfig.intervalSeconds.seconds
   ) { () =>
     haulierStatusService.updateStatus()
   }

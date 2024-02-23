@@ -25,6 +25,7 @@ import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseSpec
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.http.HttpResponse
 
 import java.time.Instant
@@ -76,8 +77,8 @@ class HaulierStatusServiceSpec extends BaseSpec {
   }
 
   "updateStatus" should {
-    "set status to AVAILABLE if no correlation ids older than threshold" in new Setup {
-      when(mockHaulierStatusRepository.findAllOlderThan(anyInt()))
+    "set status to AVAILABLE if no correlation ids older than specified interval" in new Setup {
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt()))
         .thenReturn(Future.successful(Seq.empty[HaulierStatusDocument]))
 
       when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
@@ -88,9 +89,29 @@ class HaulierStatusServiceSpec extends BaseSpec {
       verify(mockCustomsServiceStatusConnector).updateStatus(mEq("haulier"), same(AVAILABLE))(any())
     }
 
-    "set status to UNAVAILABLE if there are correlation ids older than threshold" in new Setup {
-      when(mockHaulierStatusRepository.findAllOlderThan(anyInt()))
-        .thenReturn(Future.successful(Seq(HaulierStatusDocument("some-id", Instant.now.minusSeconds(60)))))
+    "set status to AVAILABLE if there are old correlationIds but threshold is not breached" in new Setup {
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+
+      when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      service.updateStatus().futureValue
+
+      verify(mockCustomsServiceStatusConnector).updateStatus(mEq("haulier"), same(AVAILABLE))(any())
+    }
+
+    "set status to UNAVAILABLE if the configured threshold is breached" in new Setup {
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(20)(createdDocument)
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
 
       when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
         .thenReturn(Future.successful(mock[HttpResponse]))

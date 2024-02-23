@@ -19,18 +19,23 @@ package uk.gov.hmrc.gvmshaulierstatus.repositories
 import org.mongodb.scala.model.Filters
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
 import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
 
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.MILLIS
 import java.time.{Clock, Instant}
 
 class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierStatusDocument] {
 
   override protected val repository: HaulierStatusRepository = new HaulierStatusRepository(mongoComponent)
 
+  val createdAt       = Instant.now
+  val lastUpdatedAt   = Instant.now
+  val createdDocument = HaulierStatusDocument("corr-1", Created, createdAt, lastUpdatedAt)
+
   "findAndDelete" should {
     "return the id of the record after successfully deleting" in {
-      await(insert(HaulierStatusDocument("corr-1", Instant.now(Clock.systemUTC()))))
+      await(insert(createdDocument))
       await(repository.findAndDelete(CorrelationId("corr-1"))) shouldBe Some("corr-1")
 
       await(repository.collection.find(Filters.equal("id", "corr-1".toBson())).toFuture()).length shouldBe 0
@@ -43,9 +48,9 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
 
   "findOlderThan" should {
     "return only records older than the specified time" in {
-      await(insert(HaulierStatusDocument("corr-1", Instant.now(Clock.systemUTC()))))
-      await(insert(HaulierStatusDocument("corr-2", Instant.now(Clock.systemUTC()).minusSeconds(21))))
-      inside(await(repository.findAllOlderThan(20))) {
+      await(insert(createdDocument))
+      await(insert(createdDocument.copy(id = "corr-2", createdAt = createdAt.minusSeconds(21))))
+      inside(await(repository.findAllOlderThan(20, 50))) {
         case Seq(document) => document.id shouldBe "corr-2"
       }
     }
@@ -57,7 +62,7 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
       await(repository.create(CorrelationId("corr-5"))(instant)) shouldBe "corr-5"
 
       inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) {
-        case Seq(document) => document shouldBe HaulierStatusDocument("corr-5", instant.truncatedTo(ChronoUnit.MILLIS))
+        case Seq(document) => document shouldBe HaulierStatusDocument("corr-5", Created, instant.truncatedTo(MILLIS), instant.truncatedTo(MILLIS))
       }
     }
   }
