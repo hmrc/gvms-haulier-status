@@ -1,4 +1,4 @@
 # microservice specific routes
 
 POST          /movements                       uk.gov.hmrc.gvmshaulierstatus.controllers.HaulierStatusController.create()
-DELETE        /movements/:correlationId        uk.gov.hmrc.gvmshaulierstatus.controllers.HaulierStatusController.delete(correlationId: CorrelationId)
+PUT           /movements/:correlationId        uk.gov.hmrc.gvmshaulierstatus.controllers.HaulierStatusController.update(correlationId: CorrelationId)

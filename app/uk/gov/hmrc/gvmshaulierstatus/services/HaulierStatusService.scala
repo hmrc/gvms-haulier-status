@@ -47,8 +47,8 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
           case _: MongoWriteException => Left(CorrelationIdAlreadyExists)
         })
 
-  def delete(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
-    EitherT.fromOptionF(haulierStatusRepository.findAndDelete(correlationId), CorrelationIdNotFound)
+  def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
+    EitherT.fromOptionF(haulierStatusRepository.findAndUpdate(correlationId, Received), CorrelationIdNotFound)
 
   def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Future[HttpResponse]] =
     haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).map { documents =>

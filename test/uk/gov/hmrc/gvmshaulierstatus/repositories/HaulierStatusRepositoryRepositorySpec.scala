@@ -19,7 +19,7 @@ package uk.gov.hmrc.gvmshaulierstatus.repositories
 import org.mongodb.scala.model.Filters
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
 
 import java.time.temporal.ChronoUnit.MILLIS
@@ -33,16 +33,18 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
   val lastUpdatedAt   = Instant.now
   val createdDocument = HaulierStatusDocument("corr-1", Created, createdAt, lastUpdatedAt)
 
-  "findAndDelete" should {
-    "return the id of the record after successfully deleting" in {
+  "findAndUpdate" should {
+    "return the id of the record after successfully updating" in {
       await(insert(createdDocument))
-      await(repository.findAndDelete(CorrelationId("corr-1"))) shouldBe Some("corr-1")
+      await(repository.findAndUpdate(CorrelationId("corr-1"), Received)) shouldBe Some("corr-1")
 
-      await(repository.collection.find(Filters.equal("id", "corr-1".toBson())).toFuture()).length shouldBe 0
+      val document = await(repository.collection.find(Filters.equal("id", "corr-1".toBson())).toFuture()).headOption.value
+      document.status                                    shouldBe Received
+      document.lastUpdatedAt.isAfter(document.createdAt) shouldBe true
     }
 
     "return None when there is no record with that id" in {
-      await(repository.findAndDelete(CorrelationId("corr-1"))) shouldBe None
+      await(repository.findAndUpdate(CorrelationId("corr-2"), Received)) shouldBe None
     }
   }
 

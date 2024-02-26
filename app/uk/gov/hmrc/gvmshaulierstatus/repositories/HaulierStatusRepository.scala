@@ -22,10 +22,11 @@ import org.mongodb.scala._
 import org.mongodb.scala.bson.BsonDateTime
 import org.mongodb.scala.model.Aggregates.sort
 import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Updates.{combine, set}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.{HaulierStatusDocument, Status}
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.Codecs._
@@ -67,10 +68,17 @@ class HaulierStatusRepository @Inject()(
         .toFuture()
     )
 
-  def findAndDelete(correlationId: CorrelationId): Future[Option[String]] =
+  def findAndUpdate(correlationId: CorrelationId, status: Status)(
+    implicit instant:              Instant = Instant.now(Clock.systemUTC())): Future[Option[String]] =
     Mdc.preservingMdc(
       collection
-        .findOneAndDelete(equal("id", correlationId.id.toBson()))
+        .findOneAndUpdate(
+          filter = equal("id", correlationId.id.toBson()),
+          combine(
+            set("status", status.toBson()),
+            set("lastUpdatedAt", instant)
+          )
+        )
         .toFutureOption()
         .map(_.map(_.id))
     )
