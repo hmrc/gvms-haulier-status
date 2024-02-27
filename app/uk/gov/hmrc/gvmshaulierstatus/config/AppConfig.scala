@@ -26,7 +26,7 @@ class AppConfig @Inject()(val config: Configuration) {
   val expireAfterSeconds:  Int    = config.get[Int]("mongodb.haulier-status.expireAfterSeconds")
   val initialDelaySeconds: Int    = config.get[Int]("statusCheckScheduler.initialDelaySeconds")
   val intervalSeconds:     Int    = config.get[Int]("statusCheckScheduler.intervalSeconds")
-  val limit:               Int    = config.get[Int]("statusCheckScheduler.correlation_ids_limit")
+  val limit:               Int    = config.get[Int]("statusCheckScheduler.correlationIdsLimit")
   val threshold:           Double = config.get[Double]("statusCheckScheduler.threshold")
 
   val haulierServiceId: String = config.get[String]("service.id")
