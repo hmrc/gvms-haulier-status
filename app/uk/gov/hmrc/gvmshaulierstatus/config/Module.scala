@@ -17,7 +17,7 @@
 package uk.gov.hmrc.gvmshaulierstatus.config
 
 import com.google.inject.{AbstractModule, Provides}
-import uk.gov.hmrc.gvmshaulierstatus.statusCheck.NotificationCheckScheduler
+import uk.gov.hmrc.gvmshaulierstatus.statusCheck.StatusCheckScheduler
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.Named
@@ -26,7 +26,7 @@ import javax.inject.Singleton
 class Module extends AbstractModule {
 
   override def configure(): Unit =
-    bind(classOf[NotificationCheckScheduler]).asEagerSingleton()
+    bind(classOf[StatusCheckScheduler]).asEagerSingleton()
 
   @Provides
   @Named("customsServiceStatusUrl")

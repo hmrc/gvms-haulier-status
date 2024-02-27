@@ -18,23 +18,59 @@ package uk.gov.hmrc.gvmshaulierstatus.model.documents
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument.timeFormatter
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.Instant
+import java.time.{Instant, ZoneId}
+import java.time.format.DateTimeFormatter
 
-case class HaulierStatusDocument(id: String, createdAt: Instant)
+sealed trait Status {
+  val value: String = toString
+}
+
+object Status {
+
+  case object Created extends Status
+  case object Received extends Status
+
+  implicit val format: Format[Status] = new Format[Status] {
+
+    override def writes(o: Status): JsValue = JsString(o.value)
+
+    override def reads(json: JsValue): JsResult[Status] =
+      json.validate[String].flatMap {
+        case Created.value  => JsSuccess(Created)
+        case Received.value => JsSuccess(Received)
+        case e              => JsError(s"invalid value: $e for Status type")
+      }
+  }
+}
+
+case class HaulierStatusDocument(id: String, status: Status, createdAt: Instant, lastUpdatedAt: Instant) {
+
+  override def toString: String =
+    id + ", " +
+      s"CREATED ${timeFormatter.format(createdAt)}, " +
+      s"RECEIVED ${timeFormatter.format(lastUpdatedAt)}"
+}
 
 object HaulierStatusDocument {
+
   val mongoFormat: OFormat[HaulierStatusDocument] = {
     implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
     val read: Reads[HaulierStatusDocument] = (
       (JsPath \ "id").read[String] and
-        (JsPath \ "createdAt").read[Instant]
-    )(HaulierStatusDocument.apply _)
+        (JsPath \ "status").readWithDefault[Status](Created) and
+        (JsPath \ "createdAt").read[Instant] and
+        (JsPath \ "lastUpdatedAt").read[Instant].orElse((JsPath \ "createdAt").read[Instant])
+    )((id, status, createdAt, lastUpdatedAt) => HaulierStatusDocument(id, status, createdAt, lastUpdatedAt))
 
     OFormat[HaulierStatusDocument](read, Json.writes[HaulierStatusDocument])
   }
 
   implicit val format: OFormat[HaulierStatusDocument] = Json.format[HaulierStatusDocument]
+
+  val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MM:dd HH:mm:ss:SSS").withZone(ZoneId.of("Europe/London"))
 }

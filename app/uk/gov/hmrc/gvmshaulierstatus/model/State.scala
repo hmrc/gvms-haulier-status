@@ -27,8 +27,6 @@ object State {
   case object UNAVAILABLE extends State
   case object UNKNOWN extends State
 
-  val values: Seq[State] = Seq(AVAILABLE, UNAVAILABLE, UNKNOWN)
-
   implicit val format: Format[State] = new Format[State] {
 
     override def writes(o: State): JsValue = JsString(o.value)

@@ -16,15 +16,17 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.repositories
 
-import com.mongodb.client.model.Indexes.ascending
+import com.mongodb.client.model.Indexes.{ascending, descending}
 import org.bson.codecs.Codec
 import org.mongodb.scala._
 import org.mongodb.scala.bson.BsonDateTime
+import org.mongodb.scala.model.Aggregates.sort
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model._
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.Codecs._
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -56,10 +58,12 @@ class HaulierStatusRepository @Inject()(
       replaceIndexes = true
     ) {
 
-  def findAllOlderThan(seconds: Int): Future[Seq[HaulierStatusDocument]] =
+  def findAllOlderThan(seconds: Int, limit: Int): Future[Seq[HaulierStatusDocument]] =
     Mdc.preservingMdc(
       collection
         .find(lt("createdAt", BsonDateTime(Instant.now(Clock.systemUTC()).minusSeconds(seconds).toEpochMilli)))
+        .sort(descending("createdAt"))
+        .limit(limit)
         .toFuture()
     )
 
@@ -74,7 +78,7 @@ class HaulierStatusRepository @Inject()(
   def create(correlationId: CorrelationId)(implicit instant: Instant = Instant.now(Clock.systemUTC())): Future[String] =
     Mdc.preservingMdc(
       collection
-        .insertOne(HaulierStatusDocument(correlationId.id, instant))
+        .insertOne(HaulierStatusDocument(correlationId.id, Created, instant, instant))
         .toFuture()
         .map(_ => correlationId.id)
     )
