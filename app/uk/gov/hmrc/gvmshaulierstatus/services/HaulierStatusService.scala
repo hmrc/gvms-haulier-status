@@ -62,7 +62,7 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
         val createdDocs = documents.filter(_.status == Created)
         logger.warn("Setting haulier status to UNAVAILABLE")
         logger.info(
-          s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n")}")
+          s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}")
         customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, UNAVAILABLE)
       }
     }
