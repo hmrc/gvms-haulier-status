@@ -25,7 +25,6 @@ import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound, CreateHaulierStatusError, DeleteHaulierStatusError}
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -53,14 +52,17 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
 
   def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Future[HttpResponse]] =
     haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).map { documents =>
-      val receivedDocPercentage = (documents.count(_.status == Received).toFloat / documents.size) * 100
-      if (documents.isEmpty || (receivedDocPercentage >= appConfig.threshold)) {
+      val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status == Received).toFloat / documents.size) * 100 else 0
+      logger.debug(s"% of documents with 'Received' status: ${String.format("%.2f", receivedDocsPercentage)}")
+
+      if (documents.isEmpty || (receivedDocsPercentage >= appConfig.threshold)) {
         logger.info("Setting haulier status to AVAILABLE")
         customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, AVAILABLE)
       } else {
         val createdDocs = documents.filter(_.status == Created)
         logger.warn("Setting haulier status to UNAVAILABLE")
-        logger.info(s"${createdDocs.length} Correlation ids found (curtailed): ${createdDocs.map(_.id).takeRight(10).mkString(", ")}")
+        logger.info(
+          s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n")}")
         customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, UNAVAILABLE)
       }
     }
