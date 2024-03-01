@@ -47,10 +47,10 @@ class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusServi
     }
   }
 
-  def delete(correlationId: CorrelationId): Action[AnyContent] = Action.async { implicit request =>
+  def update(correlationId: CorrelationId): Action[AnyContent] = Action.async { implicit request =>
     MDC.put(correlationIdHeader, correlationId.id)
     haulierStatusService
-      .delete(correlationId)
+      .update(correlationId)
       .fold(
         {
           case CorrelationIdNotFound => NotFound(s"No entry with correlation id ${correlationId.id} found")

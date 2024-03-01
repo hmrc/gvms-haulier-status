@@ -70,30 +70,30 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     }
   }
 
-  "delete" should {
-    "return 200 Ok after successfully deleting if correlation id exists" in new Setup {
+  "update" should {
+    "return 200 Ok after successfully updating if correlation id exists" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.delete(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
 
-      val result: Future[Result] = controller.delete(correlationId)(fakeRequest)
+      val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 
       status(result) shouldBe OK
 
-      verify(mockHaulierStatusService).delete(mEq(correlationId))
+      verify(mockHaulierStatusService).update(mEq(correlationId))
     }
 
     "return 404 Not Found if correlation id does not exist" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.delete(mEq(correlationId))).thenReturn(EitherT.leftT(CorrelationIdNotFound))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.leftT(CorrelationIdNotFound))
 
-      val result: Future[Result] = controller.delete(correlationId)(fakeRequest)
+      val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 
       status(result)          shouldBe NOT_FOUND
       contentAsString(result) should include(s"No entry with correlation id ${correlationId.id} found")
 
-      verify(mockHaulierStatusService).delete(mEq(correlationId))
+      verify(mockHaulierStatusService).update(mEq(correlationId))
     }
   }
 }

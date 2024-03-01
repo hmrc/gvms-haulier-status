@@ -56,23 +56,23 @@ class HaulierStatusServiceSpec extends BaseSpec {
     }
   }
 
-  "delete" should {
+  "update" should {
     "successfully delete if correlation id exists" in new Setup {
       val correlationId: CorrelationId = CorrelationId("pre-existing-correlation-id")
 
-      when(mockHaulierStatusRepository.findAndDelete(correlationId))
+      when(mockHaulierStatusRepository.findAndUpdate(correlationId, Received))
         .thenReturn(Future.successful(Some(correlationId.id)))
 
-      service.delete(correlationId).value.futureValue shouldBe Right(correlationId.id)
+      service.update(correlationId).value.futureValue shouldBe Right(correlationId.id)
     }
 
     "return correlation id not found if no entry with that id" in new Setup {
       val correlationId: CorrelationId = CorrelationId("non-existent-correlation-id")
 
-      when(mockHaulierStatusRepository.findAndDelete(correlationId))
+      when(mockHaulierStatusRepository.findAndUpdate(correlationId, Received))
         .thenReturn(Future.successful(None))
 
-      service.delete(correlationId).value.futureValue shouldBe Left(CorrelationIdNotFound)
+      service.update(correlationId).value.futureValue shouldBe Left(CorrelationIdNotFound)
     }
   }
 
