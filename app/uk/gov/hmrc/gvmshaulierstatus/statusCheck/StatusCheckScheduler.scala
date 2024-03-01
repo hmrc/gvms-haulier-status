@@ -17,9 +17,12 @@
 package uk.gov.hmrc.gvmshaulierstatus.statusCheck
 
 import org.apache.pekko.actor.ActorSystem
+import play.api.Logging
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.services.HaulierStatusService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.TimestampSupport
+import uk.gov.hmrc.mongo.lock.{MongoLockRepository, ScheduledLockService}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -29,16 +32,37 @@ import scala.language.postfixOps
 @Singleton
 class StatusCheckScheduler @Inject()(
   actorSystem:               ActorSystem,
-  haulierStatusService:      HaulierStatusService
-)(implicit executionContext: ExecutionContext, appConfig: AppConfig) {
+  haulierStatusService:      HaulierStatusService,
+  mongoLockRepository:       MongoLockRepository,
+  timestampSupport:          TimestampSupport,
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig)
+    extends Logging {
 
   implicit private val headerCarrier: HeaderCarrier = HeaderCarrier()
 
-  actorSystem.scheduler.scheduleAtFixedRate(
-    initialDelay = appConfig.initialDelaySeconds.seconds,
-    interval     = appConfig.intervalSeconds.seconds
-  ) { () =>
-    haulierStatusService.updateStatus()
-  }
+  private val lockId              = "status_check_lock"
+  private val initialDelaySeconds = appConfig.initialDelaySeconds.seconds
+  private val intervalSeconds     = appConfig.intervalSeconds.seconds
 
+  private val lockService =
+    ScheduledLockService(
+      lockRepository    = mongoLockRepository,
+      lockId            = lockId,
+      timestampSupport  = timestampSupport,
+      schedulerInterval = intervalSeconds
+    )
+
+  actorSystem.scheduler.scheduleAtFixedRate(
+    initialDelay = initialDelaySeconds,
+    interval     = intervalSeconds
+  ) { () =>
+    lockService
+      .withLock {
+        haulierStatusService.updateStatus()
+      }
+      .map {
+        case Some(response) => logger.debug(s"Finished StatusCheck with response ${response.status}. Lock has been released.")
+        case None           => logger.debug("Failed to take StatusCheck lock.")
+      }
+  }
 }

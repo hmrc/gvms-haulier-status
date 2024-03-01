@@ -50,8 +50,8 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
   def delete(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
     EitherT.fromOptionF(haulierStatusRepository.findAndDelete(correlationId), CorrelationIdNotFound)
 
-  def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Future[HttpResponse]] =
-    haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).map { documents =>
+  def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] =
+    haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).flatMap { documents =>
       val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status == Received).toFloat / documents.size) * 100 else 0
       logger.debug(s"% of documents with 'Received' status: ${String.format("%.2f", receivedDocsPercentage)}")
 
