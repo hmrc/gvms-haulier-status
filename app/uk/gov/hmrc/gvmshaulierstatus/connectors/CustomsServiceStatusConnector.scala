@@ -23,10 +23,10 @@ import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CustomsServiceStatusConnector @Inject()(
+class CustomsServiceStatusConnector @Inject() (
   httpClient:                                                    HttpClient,
   @Named("customsServiceStatusUrl") customsServiceStatusBaseUrl: String
-)(implicit ec:                                                   ExecutionContext) {
+)(implicit ec: ExecutionContext) {
 
   private val baseUrl = s"$customsServiceStatusBaseUrl/customs-service-status"
 

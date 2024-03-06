@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.services
 
-import org.mockito.ArgumentMatchers.{any, anyInt, anyString, same, eq => mEq}
+import org.mockito.ArgumentMatchers.{any, anyInt, anyString, eq => mEq, same}
 import org.mockito.Mockito.{verify, when}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.{MongoWriteException, ServerAddress, WriteError}

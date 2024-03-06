@@ -40,18 +40,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @SuppressWarnings(Array("org.wartremover.warts.Any"))
 @Singleton
-class HaulierStatusRepository @Inject()(
-  mongo:                     MongoComponent,
+class HaulierStatusRepository @Inject() (
+  mongo: MongoComponent
 )(implicit executionContext: ExecutionContext, appConfig: AppConfig)
     extends PlayMongoRepository[HaulierStatusDocument](
       collectionName = "haulier-status",
       mongoComponent = mongo,
-      domainFormat   = HaulierStatusDocument.mongoFormat,
+      domainFormat = HaulierStatusDocument.mongoFormat,
       indexes = Seq(
         IndexModel(ascending("id"), IndexOptions().name("correlationId").unique(true).sparse(true)),
         IndexModel(
           ascending("createdAt"),
-          IndexOptions().name("haulier_status_createdAt").expireAfter(appConfig.expireAfterSeconds, SECONDS).sparse(false)),
+          IndexOptions().name("haulier_status_createdAt").expireAfter(appConfig.expireAfterSeconds, SECONDS).sparse(false)
+        )
       ),
       extraCodecs = Seq[Codec[_]](
         Codecs.playFormatCodec[HaulierStatusDocument](HaulierStatusDocument.mongoFormat)
@@ -68,8 +69,9 @@ class HaulierStatusRepository @Inject()(
         .toFuture()
     )
 
-  def findAndUpdate(correlationId: CorrelationId, status: Status)(
-    implicit instant:              Instant = Instant.now(Clock.systemUTC())): Future[Option[String]] =
+  def findAndUpdate(correlationId: CorrelationId, status: Status)(implicit
+    instant: Instant = Instant.now(Clock.systemUTC())
+  ): Future[Option[String]] =
     Mdc.preservingMdc(
       collection
         .findOneAndUpdate(

@@ -27,10 +27,9 @@ class StateFormatSpec extends BaseSpec {
       List(
         (JsString("AVAILABLE"), AVAILABLE),
         (JsString("UNAVAILABLE"), UNAVAILABLE),
-        (JsString("UNKNOWN"), UNKNOWN),
-      ).foreach {
-        case (stateJson, state) =>
-          State.format.reads(stateJson) shouldBe JsSuccess(state)
+        (JsString("UNKNOWN"), UNKNOWN)
+      ).foreach { case (stateJson, state) =>
+        State.format.reads(stateJson) shouldBe JsSuccess(state)
       }
     }
 

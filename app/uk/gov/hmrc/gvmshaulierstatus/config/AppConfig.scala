@@ -21,7 +21,7 @@ import play.api.Configuration
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AppConfig @Inject()(val config: Configuration) {
+class AppConfig @Inject() (val config: Configuration) {
 
   val expireAfterSeconds:  Int    = config.get[Int]("mongodb.haulier-status.expireAfterSeconds")
   val initialDelaySeconds: Int    = config.get[Int]("statusCheckScheduler.initialDelaySeconds")

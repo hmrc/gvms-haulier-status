@@ -30,11 +30,11 @@ import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
 @Singleton
-class StatusCheckScheduler @Inject()(
-  actorSystem:               ActorSystem,
-  haulierStatusService:      HaulierStatusService,
-  mongoLockRepository:       MongoLockRepository,
-  timestampSupport:          TimestampSupport,
+class StatusCheckScheduler @Inject() (
+  actorSystem:          ActorSystem,
+  haulierStatusService: HaulierStatusService,
+  mongoLockRepository:  MongoLockRepository,
+  timestampSupport:     TimestampSupport
 )(implicit executionContext: ExecutionContext, appConfig: AppConfig)
     extends Logging {
 
@@ -46,15 +46,15 @@ class StatusCheckScheduler @Inject()(
 
   private val lockService =
     ScheduledLockService(
-      lockRepository    = mongoLockRepository,
-      lockId            = lockId,
-      timestampSupport  = timestampSupport,
+      lockRepository = mongoLockRepository,
+      lockId = lockId,
+      timestampSupport = timestampSupport,
       schedulerInterval = intervalSeconds
     )
 
   actorSystem.scheduler.scheduleAtFixedRate(
     initialDelay = initialDelaySeconds,
-    interval     = intervalSeconds
+    interval = intervalSeconds
   ) { () =>
     lockService
       .withLock {

@@ -52,8 +52,8 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
     "return only records older than the specified time" in {
       await(insert(createdDocument))
       await(insert(createdDocument.copy(id = "corr-2", createdAt = createdAt.minusSeconds(21))))
-      inside(await(repository.findAllOlderThan(20, 50))) {
-        case Seq(document) => document.id shouldBe "corr-2"
+      inside(await(repository.findAllOlderThan(20, 50))) { case Seq(document) =>
+        document.id shouldBe "corr-2"
       }
     }
   }
@@ -63,8 +63,8 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
       val instant = Instant.now(Clock.systemUTC()).minusSeconds(5)
       await(repository.create(CorrelationId("corr-5"))(instant)) shouldBe "corr-5"
 
-      inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) {
-        case Seq(document) => document shouldBe HaulierStatusDocument("corr-5", Created, instant.truncatedTo(MILLIS), instant.truncatedTo(MILLIS))
+      inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) { case Seq(document) =>
+        document shouldBe HaulierStatusDocument("corr-5", Created, instant.truncatedTo(MILLIS), instant.truncatedTo(MILLIS))
       }
     }
   }

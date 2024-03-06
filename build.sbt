@@ -18,6 +18,9 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
       "uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId"
     )
   )
+  .settings(
+    scalafmtOnCompile := true
+  )
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)

@@ -33,19 +33,21 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepository, customsServiceStatusConnector: CustomsServiceStatusConnector)(
-  implicit ec:                                                ExecutionContext,
-  appConfig:                                                  AppConfig)
-    extends Logging {
+class HaulierStatusService @Inject() (haulierStatusRepository: HaulierStatusRepository, customsServiceStatusConnector: CustomsServiceStatusConnector)(
+  implicit
+  ec:        ExecutionContext,
+  appConfig: AppConfig
+) extends Logging {
 
   def create(correlationId: CorrelationId): EitherT[Future, CreateHaulierStatusError, String] =
     EitherT(
       haulierStatusRepository
         .create(correlationId)
         .map(_.asRight[CreateHaulierStatusError])
-        .recover {
-          case _: MongoWriteException => Left(CorrelationIdAlreadyExists)
-        })
+        .recover { case _: MongoWriteException =>
+          Left(CorrelationIdAlreadyExists)
+        }
+    )
 
   def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
     EitherT.fromOptionF(haulierStatusRepository.findAndUpdate(correlationId, Received), CorrelationIdNotFound)
@@ -62,7 +64,8 @@ class HaulierStatusService @Inject()(haulierStatusRepository: HaulierStatusRepos
         val createdDocs = documents.filter(_.status == Created)
         logger.warn("Setting haulier status to UNAVAILABLE")
         logger.info(
-          s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}")
+          s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}"
+        )
         customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, UNAVAILABLE)
       }
     }
