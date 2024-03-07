@@ -53,7 +53,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       val result: Future[Result] = controller.create()(fakeRequest.withBody(Json.toJson(correlationId)))
 
-      status(result)          shouldBe BAD_REQUEST
+      status(result)        shouldBe BAD_REQUEST
       contentAsString(result) should include(s"An entry with correlation id ${correlationId.id} already exists")
 
       verify(mockHaulierStatusService).create(mEq(correlationId))
@@ -90,7 +90,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 
-      status(result)          shouldBe NOT_FOUND
+      status(result)        shouldBe NOT_FOUND
       contentAsString(result) should include(s"No entry with correlation id ${correlationId.id} found")
 
       verify(mockHaulierStatusService).update(mEq(correlationId))

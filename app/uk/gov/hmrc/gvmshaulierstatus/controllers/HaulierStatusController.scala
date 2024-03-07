@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusService, cc: ControllerComponents)(implicit ec: ExecutionContext)
+class HaulierStatusController @Inject() (haulierStatusService: HaulierStatusService, cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends BaseHaulierStatusController(cc) {
 
   private val correlationIdHeader = "X-Correlation-Id"
@@ -39,8 +39,8 @@ class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusServi
       haulierStatusService
         .create(correlationId)
         .fold(
-          {
-            case CorrelationIdAlreadyExists => BadRequest(s"An entry with correlation id ${correlationId.id} already exists")
+          { case CorrelationIdAlreadyExists =>
+            BadRequest(s"An entry with correlation id ${correlationId.id} already exists")
           },
           _ => Created
         )
@@ -52,8 +52,8 @@ class HaulierStatusController @Inject()(haulierStatusService: HaulierStatusServi
     haulierStatusService
       .update(correlationId)
       .fold(
-        {
-          case CorrelationIdNotFound => NotFound(s"No entry with correlation id ${correlationId.id} found")
+        { case CorrelationIdNotFound =>
+          NotFound(s"No entry with correlation id ${correlationId.id} found")
         },
         _ => Ok
       )
