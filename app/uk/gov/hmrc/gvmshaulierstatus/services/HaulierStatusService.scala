@@ -23,21 +23,28 @@ import play.api.Logging
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound, CreateHaulierStatusError, DeleteHaulierStatusError}
-import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
+import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
+import uk.gov.hmrc.gvmshaulierstatus.model.{CorrelationId, State}
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.gvmshaulierstatus.utils.FixedSizeList
+import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HaulierStatusService @Inject() (haulierStatusRepository: HaulierStatusRepository, customsServiceStatusConnector: CustomsServiceStatusConnector)(
-  implicit
+class HaulierStatusService @Inject() (
+  haulierStatusRepository:       HaulierStatusRepository,
+  customsServiceStatusConnector: CustomsServiceStatusConnector
+)(implicit
   ec:        ExecutionContext,
   appConfig: AppConfig
 ) extends Logging {
+
+  private val receivedPercentages = new FixedSizeList[Double](appConfig.receivedPercentagesLimit)
+  private var currentState: State = AVAILABLE
 
   def create(correlationId: CorrelationId): EitherT[Future, CreateHaulierStatusError, String] =
     EitherT(
@@ -52,21 +59,41 @@ class HaulierStatusService @Inject() (haulierStatusRepository: HaulierStatusRepo
   def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
     EitherT.fromOptionF(haulierStatusRepository.findAndUpdate(correlationId, Received), CorrelationIdNotFound)
 
-  def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[HttpResponse] =
+  def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Unit] =
     haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).flatMap { documents =>
       val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status == Received).toFloat / documents.size) * 100 else 0
+      receivedPercentages.add(receivedDocsPercentage)
       logger.debug(s"% of documents with 'Received' status: ${String.format("%.2f", receivedDocsPercentage)}")
 
-      if (documents.isEmpty || (receivedDocsPercentage >= appConfig.threshold)) {
-        logger.info("Setting haulier status to AVAILABLE")
-        customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, AVAILABLE)
+      if (documents.isEmpty) {
+        setState(AVAILABLE)
+      } else if (currentState == AVAILABLE && receivedDocsPercentage < appConfig.redThreshold) {
+        logMissingReceipts(documents)
+        setState(UNAVAILABLE)
+      } else if (currentState == AVAILABLE && receivedPercentages.forAllAndFull(_ < appConfig.orangeThreshold)) {
+        logMissingReceipts(documents)
+        setState(UNAVAILABLE)
+      } else if (currentState == UNAVAILABLE && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold)) {
+        setState(AVAILABLE)
       } else {
-        val createdDocs = documents.filter(_.status == Created)
-        logger.warn("Setting haulier status to UNAVAILABLE")
-        logger.info(
-          s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}"
-        )
-        customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, UNAVAILABLE)
+        Future.successful(())
       }
     }
+
+  private def logMissingReceipts(documents: Seq[HaulierStatusDocument]): Unit = {
+    val createdDocs = documents.filter(_.status == Created)
+    logger.info(
+      s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}"
+    )
+  }
+
+  private def setState(state: State)(implicit headerCarrier: HeaderCarrier): Future[Unit] = {
+    logger.info(s"Setting haulier status to ${state.value}")
+    currentState = state
+    customsServiceStatusConnector.updateStatus(appConfig.haulierServiceId, state).map(_ => ())
+  }
+
+  // should only be called from Test
+  private[services] def overrideState(state: State): Unit =
+    currentState = state
 }

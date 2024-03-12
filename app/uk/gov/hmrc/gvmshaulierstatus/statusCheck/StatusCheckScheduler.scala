@@ -61,8 +61,8 @@ class StatusCheckScheduler @Inject() (
         haulierStatusService.updateStatus()
       }
       .map {
-        case Some(response) => logger.debug(s"Finished StatusCheck with response ${response.status}. Lock has been released.")
-        case None           => logger.debug("Failed to take StatusCheck lock.")
+        case Some(_) => logger.debug("Finished StatusCheck. Lock has been released.")
+        case None    => logger.debug("Failed to take StatusCheck lock.")
       }
   }
 }
