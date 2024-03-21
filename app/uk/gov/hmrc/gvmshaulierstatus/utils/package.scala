@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.utils
+package uk.gov.hmrc.gvmshaulierstatus
 
-import scala.collection.mutable.ListBuffer
+import scala.concurrent.{ExecutionContext, Future}
 
-class FixedSizeList[A](maxSize: Int) {
-  private val innerBuffer = new ListBuffer[A]
+package object utils {
 
-  def add(element: A): Unit = {
-    innerBuffer += element
-    while (innerBuffer.length > maxSize) innerBuffer.remove(0)
+  implicit class FutureOps[T](f: Future[T]) {
+    def unit(implicit ec: ExecutionContext): Future[Unit] = f.map(_ => ())
   }
-
-  def isEmpty: Boolean =
-    innerBuffer.isEmpty
-
-  def forAllAndFull(predicate: A => Boolean): Boolean =
-    innerBuffer.length == maxSize && innerBuffer.forall(predicate)
-
-  private[utils] def getAll: List[A] =
-    innerBuffer.toList
 }

@@ -65,18 +65,16 @@ class HaulierStatusService @Inject() (
       receivedPercentages.add(receivedDocsPercentage)
       logger.debug(s"% of documents with 'Received' status: ${String.format("%.2f", receivedDocsPercentage)}")
 
-      if (documents.isEmpty) {
+      if (documents.isEmpty || (currentState == UNAVAILABLE && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold))) {
         setState(AVAILABLE)
-      } else if (currentState == AVAILABLE && receivedDocsPercentage < appConfig.redThreshold) {
+      } else if (
+        (currentState == AVAILABLE && receivedDocsPercentage < appConfig.redThreshold) || (currentState == AVAILABLE && receivedPercentages
+          .forAllAndFull(_ < appConfig.orangeThreshold))
+      ) {
         logMissingReceipts(documents)
         setState(UNAVAILABLE)
-      } else if (currentState == AVAILABLE && receivedPercentages.forAllAndFull(_ < appConfig.orangeThreshold)) {
-        logMissingReceipts(documents)
-        setState(UNAVAILABLE)
-      } else if (currentState == UNAVAILABLE && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold)) {
-        setState(AVAILABLE)
       } else {
-        Future.successful(())
+        Future.unit
       }
     }
 
