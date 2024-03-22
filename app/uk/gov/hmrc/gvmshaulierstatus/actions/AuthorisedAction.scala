@@ -36,6 +36,6 @@ class AuthoriseAction @Inject() (val internalAuth: BackendAuthComponents) {
     internalAuth.authorizedAction(
       writePermission,
       onUnauthorizedError = Future.successful(Results.Unauthorized("Unauthorized request")),
-      onForbiddenError = Future.successful(Results.Forbidden("Forbbiden request"))
+      onForbiddenError = Future.successful(Results.Forbidden("Forbidden request"))
     )
 }
