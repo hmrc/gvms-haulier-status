@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.actions
 
-import com.google.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{ActionBuilder, AnyContent, Request, Results}
 import uk.gov.hmrc.internalauth.client._
 
 import scala.concurrent.Future
 
-class AuthoriseAction @Inject() (val internalAuth: BackendAuthComponents) {
+@Singleton
+class AuthorisedAction @Inject() (val internalAuth: BackendAuthComponents) {
 
   private val writePermission: Predicate.Permission = Predicate.Permission(
     resource = Resource(

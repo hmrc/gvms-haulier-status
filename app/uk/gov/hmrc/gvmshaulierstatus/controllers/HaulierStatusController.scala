@@ -19,7 +19,7 @@ package uk.gov.hmrc.gvmshaulierstatus.controllers
 import org.slf4j.MDC
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.gvmshaulierstatus.actions.AuthoriseAction
+import uk.gov.hmrc.gvmshaulierstatus.actions.AuthorisedAction
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId._
@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class HaulierStatusController @Inject() (
   haulierStatusService: HaulierStatusService,
-  authorisedAction:     AuthoriseAction,
+  authorisedAction:     AuthorisedAction,
   cc:                   ControllerComponents
 )(implicit ec: ExecutionContext)
     extends BaseHaulierStatusController(cc) {

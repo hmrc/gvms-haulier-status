@@ -22,7 +22,7 @@ import org.mockito.Mockito.{never, verify, verifyNoInteractions, when}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.gvmshaulierstatus.actions.AuthoriseAction
+import uk.gov.hmrc.gvmshaulierstatus.actions.AuthorisedAction
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
 import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseControllerSpec
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
@@ -49,7 +49,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     when(mockStubBehaviour.stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval)))
       .thenReturn(Future.unit)
     val backendAuthComponentsStub: BackendAuthComponents = BackendAuthComponentsStub(mockStubBehaviour)
-    val mockAuthorisedAction = new AuthoriseAction(backendAuthComponentsStub)
+    val mockAuthorisedAction = new AuthorisedAction(backendAuthComponentsStub)
     val controller           = new HaulierStatusController(mockHaulierStatusService, mockAuthorisedAction, cc)
   }
 
