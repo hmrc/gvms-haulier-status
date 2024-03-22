@@ -49,7 +49,7 @@ trait BaseSpec
   implicit lazy val materializer:       Materializer     = Materializer(system)
   override implicit val patienceConfig: PatienceConfig   = PatienceConfig(timeout = Span(1, Seconds), interval = Span(50, Millis))
 
-  val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
-
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
+  val acceptHeader:         (String, String)                    = "Accept"        -> "application/vnd.hmrc.1.0+json"
+  val authorizationHeaders: (String, String)                    = "Authorization" -> "Token internal-auth-token"
+  val fakeRequest:          FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader, authorizationHeaders)
 }
