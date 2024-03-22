@@ -64,6 +64,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
       status(result) shouldBe CREATED
 
       verify(mockHaulierStatusService).create(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 400 Bad Request if correlation id already exists" in new Setup {
@@ -77,6 +78,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
       contentAsString(result) should include(s"An entry with correlation id ${correlationId.id} already exists")
 
       verify(mockHaulierStatusService).create(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 400 Bad Request if payload has unexpected JSON structure" in new Setup {
@@ -87,6 +89,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
       status(result) shouldBe BAD_REQUEST
 
       verifyNoInteractions(mockHaulierStatusService)
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 401 Unauthorized if internal-auth fails to authenticate (expired or invalid token)" in new Setup {
@@ -100,8 +103,8 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       status(result) shouldBe UNAUTHORIZED
 
-      verify(mockHaulierStatusService, never()).create(mEq(correlationId))
-
+      verify(mockHaulierStatusService, never).create(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 401 Unauthorized if internal-auth fails to authenticate (missing token)" in new Setup {
@@ -114,7 +117,8 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       status(result) shouldBe UNAUTHORIZED
 
-      verify(mockHaulierStatusService, never()).create(mEq(correlationId))
+      verify(mockHaulierStatusService, never).create(mEq(correlationId))
+      verify(mockStubBehaviour, never).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 403 Forbidden if internal-auth fails to authorize access to the resource" in new Setup {
@@ -128,8 +132,8 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       status(result) shouldBe FORBIDDEN
 
-      verify(mockHaulierStatusService, never()).create(mEq(correlationId))
-
+      verify(mockHaulierStatusService, never).create(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
   }
 
@@ -144,6 +148,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
       status(result) shouldBe OK
 
       verify(mockHaulierStatusService).update(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 404 Not Found if correlation id does not exist" in new Setup {
@@ -157,6 +162,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
       contentAsString(result) should include(s"No entry with correlation id ${correlationId.id} found")
 
       verify(mockHaulierStatusService).update(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 401 Unauthorized if internal-auth fails to authenticate (expired or invalid token)" in new Setup {
@@ -170,8 +176,8 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       status(result) shouldBe UNAUTHORIZED
 
-      verify(mockHaulierStatusService, never()).update(mEq(correlationId))
-
+      verify(mockHaulierStatusService, never).update(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 401 Unauthorized if internal-auth fails to authenticate (missing token)" in new Setup {
@@ -184,7 +190,8 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       status(result) shouldBe UNAUTHORIZED
 
-      verify(mockHaulierStatusService, never()).update(mEq(correlationId))
+      verify(mockHaulierStatusService, never).update(mEq(correlationId))
+      verify(mockStubBehaviour, never).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
 
     "return 403 Forbidden if internal-auth fails to authorize access to the resource" in new Setup {
@@ -198,8 +205,8 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       status(result) shouldBe FORBIDDEN
 
-      verify(mockHaulierStatusService, never()).update(mEq(correlationId))
-
+      verify(mockHaulierStatusService, never).update(mEq(correlationId))
+      verify(mockStubBehaviour).stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval))
     }
   }
 }
