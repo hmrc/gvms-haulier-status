@@ -17,7 +17,7 @@
 package uk.gov.hmrc.gvmshaulierstatus.services
 
 import org.mockito.ArgumentMatchers.{any, anyInt, anyString, eq => mEq, same}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.{MongoWriteException, ServerAddress, WriteError}
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
@@ -89,12 +89,20 @@ class HaulierStatusServiceSpec extends BaseSpec {
       verify(mockCustomsServiceStatusConnector).updateStatus(mEq("haulier"), same(AVAILABLE))(any())
     }
 
-    "set status to AVAILABLE if there are old correlationIds but threshold is not breached" in new Setup {
+    "set status to AVAILABLE if state currently UNAVAILABLE and there are n consecutive percentages at ORANGE threshold" in new Setup {
+      service.overrideState(UNAVAILABLE)
+
       val createdAt        = Instant.now.minusSeconds(60)
       val lastUpdatedAt    = Instant.now.minusSeconds(30)
       val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
+
+      for (i <- 1 to 5) yield {
+        when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+        service.updateStatus().futureValue
+      }
+
       when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
 
       when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
@@ -105,12 +113,113 @@ class HaulierStatusServiceSpec extends BaseSpec {
       verify(mockCustomsServiceStatusConnector).updateStatus(mEq("haulier"), same(AVAILABLE))(any())
     }
 
-    "set status to UNAVAILABLE if the configured threshold is breached" in new Setup {
+    "do not change status if state currently UNAVAILABLE and there are n-1 consecutive percentages at ORANGE threshold then 1 below ORANGE" in new Setup {
+      service.overrideState(UNAVAILABLE)
+
       val createdAt        = Instant.now.minusSeconds(60)
       val lastUpdatedAt    = Instant.now.minusSeconds(30)
       val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
       val receivedDocument = createdDocument.copy(status = Received)
-      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(20)(createdDocument)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
+
+      for (i <- 1 to 5) yield {
+        when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+        service.updateStatus().futureValue
+      }
+
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt()))
+        .thenReturn(Future.successful(List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)))
+
+      service.updateStatus().futureValue
+
+      verifyNoInteractions(mockCustomsServiceStatusConnector)
+    }
+
+    "do not change status if state currently UNAVAILABLE and there is 1 below ORANGE threshold then n-1 consecutive percentages at ORANGE threshold" in new Setup {
+      service.overrideState(UNAVAILABLE)
+
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
+
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt()))
+        .thenReturn(Future.successful(List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)))
+
+      service.updateStatus().futureValue
+
+      for (i <- 1 to 5) yield {
+        when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+        service.updateStatus().futureValue
+      }
+
+      verifyNoInteractions(mockCustomsServiceStatusConnector)
+    }
+
+    "do not change status if state currently AVAILABLE and less than n percentages received even if all below ORANGE threshold" in new Setup {
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
+
+      for (i <- 1 to 5) yield {
+        when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+        service.updateStatus().futureValue
+      }
+
+      verifyNoInteractions(mockCustomsServiceStatusConnector)
+    }
+
+    "do not change status if state currently AVAILABLE and n-1 consecutive percentages received below ORANGE threshold" in new Setup {
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
+
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt()))
+        .thenReturn(Future.successful(List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)))
+
+      service.updateStatus().futureValue
+
+      for (i <- 1 to 5) yield {
+        when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+        service.updateStatus().futureValue
+      }
+
+      verifyNoInteractions(mockCustomsServiceStatusConnector)
+    }
+
+    "set status to UNAVAILABLE if n consecutive percentages received below ORANGE threshold" in new Setup {
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
+
+      for (i <- 1 to 5) yield {
+        when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+        service.updateStatus().futureValue
+      }
+
+      when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
+
+      when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      service.updateStatus().futureValue
+
+      verify(mockCustomsServiceStatusConnector).updateStatus(mEq("haulier"), same(UNAVAILABLE))(any())
+    }
+
+    "set status to UNAVAILABLE immediately if the RED threshold is breached" in new Setup {
+      val createdAt        = Instant.now.minusSeconds(60)
+      val lastUpdatedAt    = Instant.now.minusSeconds(30)
+      val createdDocument  = HaulierStatusDocument("some-id", Created, createdAt, lastUpdatedAt)
+      val receivedDocument = createdDocument.copy(status = Received)
+      val dbResult         = List.fill(2)(receivedDocument) ++ List.fill(19)(createdDocument)
       when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
 
       when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
