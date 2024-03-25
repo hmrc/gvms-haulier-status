@@ -19,6 +19,7 @@ package uk.gov.hmrc.gvmshaulierstatus.controllers
 import org.slf4j.MDC
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.gvmshaulierstatus.actions.AuthorisedAction
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId._
@@ -28,34 +29,40 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class HaulierStatusController @Inject() (haulierStatusService: HaulierStatusService, cc: ControllerComponents)(implicit ec: ExecutionContext)
+class HaulierStatusController @Inject() (
+  haulierStatusService: HaulierStatusService,
+  authorisedAction:     AuthorisedAction,
+  cc:                   ControllerComponents
+)(implicit ec: ExecutionContext)
     extends BaseHaulierStatusController(cc) {
 
   private val correlationIdHeader = "X-Correlation-Id"
 
-  def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    validateJson[CorrelationId] { correlationId =>
+  def create(): Action[JsValue] =
+    authorisedAction.withInternalAuth.async(parse.json) { implicit request =>
+      validateJson[CorrelationId] { correlationId =>
+        MDC.put(correlationIdHeader, correlationId.id)
+        haulierStatusService
+          .create(correlationId)
+          .fold(
+            { case CorrelationIdAlreadyExists =>
+              BadRequest(s"An entry with correlation id ${correlationId.id} already exists")
+            },
+            _ => Created
+          )
+      }
+    }
+
+  def update(correlationId: CorrelationId): Action[AnyContent] =
+    authorisedAction.withInternalAuth.async { implicit request =>
       MDC.put(correlationIdHeader, correlationId.id)
       haulierStatusService
-        .create(correlationId)
+        .update(correlationId)
         .fold(
-          { case CorrelationIdAlreadyExists =>
-            BadRequest(s"An entry with correlation id ${correlationId.id} already exists")
+          { case CorrelationIdNotFound =>
+            NotFound(s"No entry with correlation id ${correlationId.id} found")
           },
-          _ => Created
+          _ => Ok
         )
     }
-  }
-
-  def update(correlationId: CorrelationId): Action[AnyContent] = Action.async { implicit request =>
-    MDC.put(correlationIdHeader, correlationId.id)
-    haulierStatusService
-      .update(correlationId)
-      .fold(
-        { case CorrelationIdNotFound =>
-          NotFound(s"No entry with correlation id ${correlationId.id} found")
-        },
-        _ => Ok
-      )
-  }
 }
