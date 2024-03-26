@@ -12,6 +12,10 @@ By default, the service runs on port 8990.
 
 ```POST /gvms-haulier-status/movements```
 
+with header :
+
+Authorization {InternalAuth token}
+
 ```
 Request Body Example
 {
@@ -37,12 +41,16 @@ Correlation Id already created
 
 ```
 
-```DELETE /gvms-haulier-status/movements/:correlationId```
+```PUT /gvms-haulier-status/movements/:correlationId```
+
+with header :
+
+Authorization {InternalAuth token}
 
 ```
 Success Response
 
-Correlation id deleted
+Correlation id updated
 
  * **Code:** 200
  
