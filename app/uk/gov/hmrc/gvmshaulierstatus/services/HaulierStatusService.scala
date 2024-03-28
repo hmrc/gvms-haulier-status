@@ -46,9 +46,11 @@ class HaulierStatusService @Inject() (
   private val receivedPercentages = new FixedSizeList[Double](appConfig.receivedPercentagesLimit)
   private var currentState: State = AVAILABLE
 
-  def initialise()(implicit headerCarrier: HeaderCarrier): Future[Unit] = {
+  initialise()
+
+  private def initialise(): Future[Unit] = {
     logger.info("Initialising state...")
-    setState(AVAILABLE)
+    setState(AVAILABLE)(HeaderCarrier())
   }
 
   def create(correlationId: CorrelationId): EitherT[Future, CreateHaulierStatusError, String] =
