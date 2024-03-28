@@ -52,6 +52,11 @@ class StatusCheckScheduler @Inject() (
       schedulerInterval = intervalSeconds
     )
 
+  lockService
+    .withLock {
+      haulierStatusService.initialise()
+    }
+
   actorSystem.scheduler.scheduleAtFixedRate(
     initialDelay = initialDelaySeconds,
     interval = intervalSeconds
