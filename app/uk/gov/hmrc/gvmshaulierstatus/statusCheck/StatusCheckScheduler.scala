@@ -25,7 +25,7 @@ import uk.gov.hmrc.mongo.TimestampSupport
 import uk.gov.hmrc.mongo.lock.{MongoLockRepository, ScheduledLockService}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
@@ -52,10 +52,10 @@ class StatusCheckScheduler @Inject() (
       schedulerInterval = intervalSeconds
     )
 
-  lockService
-    .withLock {
-      haulierStatusService.initialise()
-    }
+  Await.ready(
+    lockService.withLock(haulierStatusService.initialise()),
+    1.minute
+  )
 
   actorSystem.scheduler.scheduleAtFixedRate(
     initialDelay = initialDelaySeconds,
