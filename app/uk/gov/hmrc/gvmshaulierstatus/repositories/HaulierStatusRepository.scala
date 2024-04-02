@@ -20,7 +20,6 @@ import com.mongodb.client.model.Indexes.{ascending, descending}
 import org.bson.codecs.Codec
 import org.mongodb.scala._
 import org.mongodb.scala.bson.BsonDateTime
-import org.mongodb.scala.model.Aggregates.sort
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates.{combine, set}
 import org.mongodb.scala.model._
