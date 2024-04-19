@@ -54,7 +54,7 @@ class HaulierStatusController @Inject() (
     }
 
   def update(correlationId: CorrelationId): Action[AnyContent] =
-    authorisedAction.withInternalAuth.async { implicit request =>
+    authorisedAction.withInternalAuth.async { _ =>
       MDC.put(correlationIdHeader, correlationId.id)
       haulierStatusService
         .update(correlationId)

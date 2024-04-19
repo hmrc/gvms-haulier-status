@@ -17,6 +17,7 @@
 package uk.gov.hmrc.gvmshaulierstatus.connectors
 
 import uk.gov.hmrc.gvmshaulierstatus.model.State
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.{Inject, Named, Singleton}
