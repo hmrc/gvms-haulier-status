@@ -30,7 +30,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockHaulierStatusService:          HaulierStatusService          = mock[HaulierStatusService]
 
   override protected def beforeEach(): Unit =
-    Seq(
+    Seq[Any](
       mockCustomsServiceStatusConnector,
       mockHaulierStatusRepository,
       mockHaulierStatusService
