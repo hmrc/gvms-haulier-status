@@ -68,8 +68,9 @@ class HaulierStatusRepository @Inject() (
         .toFuture()
     )
 
-  def findAndUpdate(correlationId: CorrelationId, status: Status): Future[Option[String]] = {
-    implicit val instant: Instant = Instant.now(Clock.systemUTC())
+  def findAndUpdate(correlationId: CorrelationId, status: Status)(implicit
+    instant: Instant = Instant.now(Clock.systemUTC())
+  ): Future[Option[String]] =
     Mdc.preservingMdc(
       collection
         .findOneAndUpdate(
@@ -82,16 +83,13 @@ class HaulierStatusRepository @Inject() (
         .toFutureOption()
         .map(_.map(_.id))
     )
-  }
 
-  def create(correlationId: CorrelationId): Future[String] = {
-    implicit val instant: Instant = Instant.now(Clock.systemUTC())
+  def create(correlationId: CorrelationId)(implicit instant: Instant = Instant.now(Clock.systemUTC())): Future[String] =
     Mdc.preservingMdc(
       collection
         .insertOne(HaulierStatusDocument(correlationId.id, Created, instant, instant))
         .toFuture()
         .map(_ => correlationId.id)
     )
-  }
 
 }

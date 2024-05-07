@@ -29,6 +29,7 @@ object WartRemoverSettings {
         PublicInference,
         Nothing,
         Var,
+        DefaultArguments,
         Equals,
         Overloading,
         FinalCaseClass,
