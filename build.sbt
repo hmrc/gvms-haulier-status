@@ -25,5 +25,6 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
+  .settings(WartRemoverSettings.settings)
 
 evictionErrorLevel := Level.Warn

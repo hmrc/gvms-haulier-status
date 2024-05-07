@@ -28,7 +28,7 @@ import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.http.HttpResponse
 
-import java.time.Instant
+import java.time.{Clock, Instant}
 import scala.concurrent.Future
 
 class HaulierStatusServiceSpec extends BaseSpec {
@@ -57,6 +57,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
   }
 
   "update" should {
+    implicit val instant: Instant = Instant.now(Clock.systemUTC())
     "successfully delete if correlation id exists" in new Setup {
       val correlationId: CorrelationId = CorrelationId("pre-existing-correlation-id")
 
@@ -98,7 +99,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -122,7 +123,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -149,7 +150,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
       service.updateStatus().futureValue
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -164,7 +165,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -184,7 +185,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
       service.updateStatus().futureValue
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -199,7 +200,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }

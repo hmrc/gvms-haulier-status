@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.services
 
-import cats.data.EitherT
-import cats.implicits._
 import org.mongodb.scala.MongoWriteException
 import play.api.Logging
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
@@ -30,7 +28,11 @@ import uk.gov.hmrc.gvmshaulierstatus.model.{CorrelationId, State}
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.gvmshaulierstatus.utils.FixedSizeList
 import uk.gov.hmrc.http.HeaderCarrier
+import cats.data.EitherT
+import cats.implicits.catsSyntaxEitherId
+import cats.implicits.catsSyntaxEq
 
+import java.time.{Clock, Instant}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -61,19 +63,21 @@ class HaulierStatusService @Inject() (
         }
     )
 
-  def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
+  def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] = {
+    implicit val instant: Instant = Instant.now(Clock.systemUTC())
     EitherT.fromOptionF(haulierStatusRepository.findAndUpdate(correlationId, Received), CorrelationIdNotFound)
+  }
 
   def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Unit] =
     haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).flatMap { documents =>
-      val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status == Received).toFloat / documents.size) * 100 else 0
+      val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status.value === Received.value).toFloat / documents.size) * 100 else 0
       receivedPercentages.add(receivedDocsPercentage)
       logger.debug(s"% of documents with 'Received' status: ${String.format("%.2f", receivedDocsPercentage)}")
 
-      if (documents.isEmpty || (currentState == UNAVAILABLE && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold))) {
+      if (documents.isEmpty || (currentState.value === UNAVAILABLE.value && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold))) {
         setState(AVAILABLE)
       } else if (
-        (currentState == AVAILABLE && receivedDocsPercentage < appConfig.redThreshold) || (currentState == AVAILABLE && receivedPercentages
+        (currentState.value === AVAILABLE.value && receivedDocsPercentage < appConfig.redThreshold) || (currentState.value === AVAILABLE.value && receivedPercentages
           .forAllAndFull(_ < appConfig.orangeThreshold))
       ) {
         logMissingReceipts(documents)
@@ -84,7 +88,7 @@ class HaulierStatusService @Inject() (
     }
 
   private def logMissingReceipts(documents: Seq[HaulierStatusDocument]): Unit = {
-    val createdDocs = documents.filter(_.status == Created)
+    val createdDocs = documents.filter(_.status.value === Created.value)
     logger.info(
       s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}"
     )

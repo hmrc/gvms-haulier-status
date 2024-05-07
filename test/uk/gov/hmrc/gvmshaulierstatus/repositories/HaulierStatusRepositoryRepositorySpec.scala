@@ -22,8 +22,7 @@ import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
 
-import java.time.temporal.ChronoUnit.MILLIS
-import java.time.{Clock, Instant}
+import java.time.Instant
 
 class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierStatusDocument] {
 
@@ -60,11 +59,11 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
 
   "create" should {
     "return correlation id after inserting new status record" in {
-      val instant = Instant.now(Clock.systemUTC()).minusSeconds(5)
-      await(repository.create(CorrelationId("corr-5"))(instant)) shouldBe "corr-5"
+      await(repository.create(CorrelationId("corr-5"))) shouldBe "corr-5"
 
       inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) { case Seq(document) =>
-        document shouldBe HaulierStatusDocument("corr-5", Created, instant.truncatedTo(MILLIS), instant.truncatedTo(MILLIS))
+        document.id     shouldBe "corr-5"
+        document.status shouldBe Created
       }
     }
   }

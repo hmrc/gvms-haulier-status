@@ -24,7 +24,7 @@ class StateFormatSpec extends BaseSpec {
 
   "reads" should {
     "return success for all expected values" in {
-      List(
+      List[(JsString, State)](
         (JsString("AVAILABLE"), AVAILABLE),
         (JsString("UNAVAILABLE"), UNAVAILABLE),
         (JsString("UNKNOWN"), UNKNOWN)
