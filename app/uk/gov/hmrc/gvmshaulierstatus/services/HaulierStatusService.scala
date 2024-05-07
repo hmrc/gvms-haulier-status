@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.services
 
+import cats.data.EitherT
+import cats.implicits.{catsSyntaxEitherId, catsSyntaxEq}
 import org.mongodb.scala.MongoWriteException
 import play.api.Logging
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
@@ -28,11 +30,7 @@ import uk.gov.hmrc.gvmshaulierstatus.model.{CorrelationId, State}
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.gvmshaulierstatus.utils.FixedSizeList
 import uk.gov.hmrc.http.HeaderCarrier
-import cats.data.EitherT
-import cats.implicits.catsSyntaxEitherId
-import cats.implicits.catsSyntaxEq
 
-import java.time.{Clock, Instant}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -63,10 +61,8 @@ class HaulierStatusService @Inject() (
         }
     )
 
-  def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] = {
-    implicit val instant: Instant = Instant.now(Clock.systemUTC())
+  def update(correlationId: CorrelationId): EitherT[Future, DeleteHaulierStatusError, String] =
     EitherT.fromOptionF(haulierStatusRepository.findAndUpdate(correlationId, Received), CorrelationIdNotFound)
-  }
 
   def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Unit] =
     haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).flatMap { documents =>

@@ -28,7 +28,7 @@ import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.http.HttpResponse
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import scala.concurrent.Future
 
 class HaulierStatusServiceSpec extends BaseSpec {
@@ -57,7 +57,6 @@ class HaulierStatusServiceSpec extends BaseSpec {
   }
 
   "update" should {
-    implicit val instant: Instant = Instant.now(Clock.systemUTC())
     "successfully delete if correlation id exists" in new Setup {
       val correlationId: CorrelationId = CorrelationId("pre-existing-correlation-id")
 
