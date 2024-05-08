@@ -67,14 +67,14 @@ class HaulierStatusService @Inject() (
 
   def updateStatus()(implicit headerCarrier: HeaderCarrier): Future[Unit] =
     haulierStatusRepository.findAllOlderThan(appConfig.intervalSeconds, appConfig.limit).flatMap { documents =>
-      val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status.value === Received.value).toFloat / documents.size) * 100 else 0
+      val receivedDocsPercentage = if (documents.nonEmpty) (documents.count(_.status === Received).toFloat / documents.size) * 100 else 0
       receivedPercentages.add(receivedDocsPercentage)
       logger.debug(s"% of documents with 'Received' status: ${String.format("%.2f", receivedDocsPercentage)}")
 
-      if (documents.isEmpty || (currentState.value === UNAVAILABLE.value && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold))) {
+      if (documents.isEmpty || (currentState === UNAVAILABLE && receivedPercentages.forAllAndFull(_ >= appConfig.orangeThreshold))) {
         setState(AVAILABLE)
       } else if (
-        (currentState.value === AVAILABLE.value && receivedDocsPercentage < appConfig.redThreshold) || (currentState.value === AVAILABLE.value && receivedPercentages
+        (currentState === AVAILABLE && receivedDocsPercentage < appConfig.redThreshold) || (currentState === AVAILABLE && receivedPercentages
           .forAllAndFull(_ < appConfig.orangeThreshold))
       ) {
         logMissingReceipts(documents)
@@ -85,7 +85,7 @@ class HaulierStatusService @Inject() (
     }
 
   private def logMissingReceipts(documents: Seq[HaulierStatusDocument]): Unit = {
-    val createdDocs = documents.filter(_.status.value === Created.value)
+    val createdDocs = documents.filter(_.status === Created)
     logger.info(
       s"${createdDocs.length} documents found with 'Created' status, (curtailed): ${createdDocs.takeRight(10).map(_.toString).mkString("\n", "\n", "")}"
     )

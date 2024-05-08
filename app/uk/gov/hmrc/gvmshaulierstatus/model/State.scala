@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.model
 
+import cats.implicits.catsSyntaxEq
+import cats.kernel.Eq
 import play.api.libs.json._
 
 sealed trait State {
@@ -23,6 +25,12 @@ sealed trait State {
 }
 
 object State {
+
+  implicit val statusEq: Eq[State] =
+    Eq.instance[State] { (status1, status2) =>
+      status1.value === status2.value
+    }
+
   case object AVAILABLE extends State
   case object UNAVAILABLE extends State
   case object UNKNOWN extends State
