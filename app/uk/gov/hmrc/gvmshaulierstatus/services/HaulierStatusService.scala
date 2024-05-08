@@ -35,6 +35,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
+@SuppressWarnings(Array("org.wartremover.warts.Var"))
 class HaulierStatusService @Inject() (
   haulierStatusRepository:       HaulierStatusRepository,
   customsServiceStatusConnector: CustomsServiceStatusConnector

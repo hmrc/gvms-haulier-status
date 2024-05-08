@@ -28,8 +28,6 @@ object WartRemoverSettings {
         ImplicitParameter,
         PublicInference,
         Nothing,
-        Var,
-        DefaultArguments,
         Equals,
         Overloading,
         FinalCaseClass,
