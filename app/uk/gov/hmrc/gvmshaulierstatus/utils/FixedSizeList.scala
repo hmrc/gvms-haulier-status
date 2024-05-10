@@ -17,20 +17,21 @@
 package uk.gov.hmrc.gvmshaulierstatus.utils
 
 import scala.collection.mutable.ListBuffer
+import cats.implicits.catsSyntaxEq
 
 class FixedSizeList[A](maxSize: Int) {
   private val innerBuffer = new ListBuffer[A]
 
   def add(element: A): Unit = {
     innerBuffer += element
-    while (innerBuffer.length > maxSize) innerBuffer.remove(0)
+    while (innerBuffer.lengthIs > maxSize) innerBuffer.remove(0)
   }
 
   def isEmpty: Boolean =
     innerBuffer.isEmpty
 
   def forAllAndFull(predicate: A => Boolean): Boolean =
-    innerBuffer.length == maxSize && innerBuffer.forall(predicate)
+    innerBuffer.length === maxSize && innerBuffer.forall(predicate)
 
   private[utils] def getAll: List[A] =
     innerBuffer.toList

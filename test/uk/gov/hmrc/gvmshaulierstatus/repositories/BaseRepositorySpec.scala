@@ -19,7 +19,7 @@ package uk.gov.hmrc.gvmshaulierstatus.repositories
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{Inside, Inspectors, LoneElement, OptionValues, Status => _}
+import org.scalatest.{Inside, Inspectors, LoneElement, OptionValues}
 import play.api.test._
 import uk.gov.hmrc.gvmshaulierstatus.helpers.Configs
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport

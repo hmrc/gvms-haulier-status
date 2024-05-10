@@ -68,6 +68,7 @@ class HaulierStatusRepository @Inject() (
         .toFuture()
     )
 
+  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   def findAndUpdate(correlationId: CorrelationId, status: Status)(implicit
     instant: Instant = Instant.now(Clock.systemUTC())
   ): Future[Option[String]] =
@@ -84,6 +85,7 @@ class HaulierStatusRepository @Inject() (
         .map(_.map(_.id))
     )
 
+  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   def create(correlationId: CorrelationId)(implicit instant: Instant = Instant.now(Clock.systemUTC())): Future[String] =
     Mdc.preservingMdc(
       collection

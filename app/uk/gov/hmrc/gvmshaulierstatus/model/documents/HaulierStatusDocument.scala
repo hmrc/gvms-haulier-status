@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.model.documents
 
+import cats.Eq
+import cats.implicits.catsSyntaxEq
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument.timeFormatter
@@ -30,6 +32,11 @@ sealed trait Status {
 }
 
 object Status {
+
+  implicit val statusEq: Eq[Status] =
+    Eq.instance[Status] { (status1, status2) =>
+      status1.value === status2.value
+    }
 
   case object Created extends Status
   case object Received extends Status

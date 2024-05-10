@@ -98,7 +98,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -122,7 +122,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(2)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -149,7 +149,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
       service.updateStatus().futureValue
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -164,7 +164,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -184,7 +184,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
       service.updateStatus().futureValue
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
@@ -199,7 +199,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val receivedDocument = createdDocument.copy(status = Received)
       val dbResult         = List.fill(18)(receivedDocument) ++ List.fill(3)(createdDocument)
 
-      for (i <- 1 to 5) yield {
+      (1 to 5) foreach { _ =>
         when(mockHaulierStatusRepository.findAllOlderThan(anyInt(), anyInt())).thenReturn(Future.successful(dbResult))
         service.updateStatus().futureValue
       }
