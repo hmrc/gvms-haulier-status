@@ -26,5 +26,9 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
   .settings(WartRemoverSettings.settings)
+  .settings( // fix scaladoc generation in jenkins
+    Compile / scalacOptions -= "utf8",
+    scalacOptions += "-language:postfixOps"
+  )
 
 evictionErrorLevel := Level.Warn
