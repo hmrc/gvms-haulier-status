@@ -17,17 +17,18 @@
 package uk.gov.hmrc.gvmshaulierstatus.controllers
 
 import cats.data.EitherT
-import org.mockito.ArgumentMatchers.{any, eq => mEq}
+import org.mockito.ArgumentMatchers.{any, eq as mEq}
 import org.mockito.Mockito.{never, verify, verifyNoInteractions, when}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.gvmshaulierstatus.actions.AuthorisedAction
+import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
 import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseControllerSpec
 import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.internalauth.client._
+import uk.gov.hmrc.internalauth.client.*
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 
 import scala.concurrent.Future
@@ -57,7 +58,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     "return 201 Created if correlation id does not exist" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val result: Future[Result] = controller.create()(fakeRequest.withBody(Json.toJson(correlationId)))
 
@@ -70,7 +71,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     "return 400 Bad Request if correlation id already exists" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.leftT(CorrelationIdAlreadyExists))
+      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.leftT[Future, String](CorrelationIdAlreadyExists))
 
       val result: Future[Result] = controller.create()(fakeRequest.withBody(Json.toJson(correlationId)))
 
@@ -97,7 +98,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       when(mockStubBehaviour.stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval)))
         .thenReturn(Future.failed(UpstreamErrorResponse("Unauthorized", UNAUTHORIZED)))
-      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val result: Future[Result] = controller.create()(fakeRequest.withBody(Json.toJson(correlationId)))
 
@@ -110,7 +111,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     "return 401 Unauthorized if internal-auth fails to authenticate (missing token)" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
       val result:      Future[Result]                      = controller.create()(fakeRequest.withBody(Json.toJson(correlationId)))
@@ -126,7 +127,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       when(mockStubBehaviour.stubAuth(any(), any[Retrieval[Unit]]))
         .thenReturn(Future.failed(UpstreamErrorResponse("Forbidden", FORBIDDEN)))
-      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.create(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val result: Future[Result] = controller.create()(fakeRequest.withBody(Json.toJson(correlationId)))
 
@@ -141,7 +142,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     "return 200 Ok after successfully updating if correlation id exists" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 
@@ -154,7 +155,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     "return 404 Not Found if correlation id does not exist" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.leftT(CorrelationIdNotFound))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.leftT[Future, String](CorrelationIdNotFound))
 
       val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 
@@ -170,7 +171,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       when(mockStubBehaviour.stubAuth(mEq(Some(expectedPermissionPredicate)), mEq(Retrieval.EmptyRetrieval)))
         .thenReturn(Future.failed(UpstreamErrorResponse("Unauthorized", UNAUTHORIZED)))
-      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 
@@ -183,7 +184,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
     "return 401 Unauthorized if internal-auth fails to authenticate (missing token)" in new Setup {
       val correlationId: CorrelationId = CorrelationId("corr-id-1")
 
-      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
       val result:      Future[Result]                      = controller.update(correlationId)(fakeRequest)
@@ -199,7 +200,7 @@ class HaulierStatusControllerSpec extends BaseControllerSpec {
 
       when(mockStubBehaviour.stubAuth(any(), any[Retrieval[Unit]]))
         .thenReturn(Future.failed(UpstreamErrorResponse("Forbidden", FORBIDDEN)))
-      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT(correlationId.id))
+      when(mockHaulierStatusService.update(mEq(correlationId))).thenReturn(EitherT.rightT[Future, HaulierStatusError](correlationId.id))
 
       val result: Future[Result] = controller.update(correlationId)(fakeRequest)
 

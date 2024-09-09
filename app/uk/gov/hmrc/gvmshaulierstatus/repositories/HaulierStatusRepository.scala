@@ -53,7 +53,7 @@ class HaulierStatusRepository @Inject() (
           IndexOptions().name("haulier_status_createdAt").expireAfter(appConfig.expireAfterSeconds, SECONDS).sparse(false)
         )
       ),
-      extraCodecs = Seq[Codec[_]](
+      extraCodecs = Seq[Codec[?]](
         Codecs.playFormatCodec[HaulierStatusDocument](HaulierStatusDocument.mongoFormat)
       ),
       replaceIndexes = true
@@ -75,9 +75,9 @@ class HaulierStatusRepository @Inject() (
     Mdc.preservingMdc(
       collection
         .findOneAndUpdate(
-          filter = equal("id", correlationId.id.toBson()),
+          filter = equal("id", correlationId.id.toBson),
           combine(
-            set("status", status.toBson()),
+            set("status", status.toBson),
             set("lastUpdatedAt", instant)
           )
         )
