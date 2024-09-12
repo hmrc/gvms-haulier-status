@@ -55,7 +55,7 @@ class HaulierStatusRepository @Inject() (
       ),
       extraCodecs = Seq[Codec[?]](
         Codecs.playFormatCodec[HaulierStatusDocument](HaulierStatusDocument.mongoFormat)
-      ),
+      )
     ) {
 
   def findAllOlderThan(seconds: Int, limit: Int): Future[Seq[HaulierStatusDocument]] =
