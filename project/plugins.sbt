@@ -7,8 +7,8 @@ resolvers += Resolver.typesafeRepo("releases")
 addSbtPlugin("uk.gov.hmrc"       % "sbt-auto-build"     % "3.22.0")
 addSbtPlugin("uk.gov.hmrc"       % "sbt-distributables" % "2.5.0")
 addSbtPlugin("org.playframework" % "sbt-plugin"         % "3.0.5")
-addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.1.1")
+addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.2.0")
 addSbtPlugin("org.scalameta"     % "sbt-scalafmt"       % "2.5.2")
-addSbtPlugin("org.wartremover"   % "sbt-wartremover"    % "3.1.6")
+addSbtPlugin("org.wartremover"   % "sbt-wartremover"    % "3.2.1")
 
 evictionErrorLevel := Level.Warn
