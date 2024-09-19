@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.gvmshaulierstatus.services
 
-import org.mockito.ArgumentMatchers.{any, anyInt, anyString, eq => mEq, same}
+import org.mockito.ArgumentMatchers.{any, anyInt, anyString, eq as mEq, same}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.{MongoWriteException, ServerAddress, WriteError}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
 import uk.gov.hmrc.http.HttpResponse
 
 import java.time.Instant
+import java.util.Collections
 import scala.concurrent.Future
 
 class HaulierStatusServiceSpec extends BaseSpec {
@@ -50,7 +51,7 @@ class HaulierStatusServiceSpec extends BaseSpec {
       val correlationId: CorrelationId = CorrelationId("pre-existing-correlation-id")
 
       when(mockHaulierStatusRepository.create(correlationId))
-        .thenReturn(Future.failed(new MongoWriteException(new WriteError(-1, "", new BsonDocument()), new ServerAddress)))
+        .thenReturn(Future.failed(new MongoWriteException(new WriteError(-1, "", new BsonDocument()), new ServerAddress, Collections.emptySet)))
 
       service.create(correlationId).value.futureValue shouldBe Left(CorrelationIdAlreadyExists)
     }

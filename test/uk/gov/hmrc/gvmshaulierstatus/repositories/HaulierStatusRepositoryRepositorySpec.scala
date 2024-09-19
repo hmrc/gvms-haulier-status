@@ -24,6 +24,7 @@ import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
 
 import java.time.temporal.ChronoUnit.MILLIS
 import java.time.{Clock, Instant}
+import org.mongodb.scala.ObservableFuture
 
 class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierStatusDocument] {
 
@@ -38,7 +39,7 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
       await(insert(createdDocument))
       await(repository.findAndUpdate(CorrelationId("corr-1"), Received)) shouldBe Some("corr-1")
 
-      val document = await(repository.collection.find(Filters.equal("id", "corr-1".toBson())).toFuture()).headOption.value
+      val document = await(repository.collection.find(Filters.equal("id", "corr-1".toBson)).toFuture()).headOption.value
       document.status                                    shouldBe Received
       document.lastUpdatedAt.isAfter(document.createdAt) shouldBe true
     }
@@ -63,7 +64,7 @@ class HaulierStatusRepositoryRepositorySpec extends BaseRepositorySpec[HaulierSt
       val instant = Instant.now(Clock.systemUTC()).minusSeconds(5)
       await(repository.create(CorrelationId("corr-5"))(instant)) shouldBe "corr-5"
 
-      inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson())).toFuture())) { case Seq(document) =>
+      inside(await(repository.collection.find(Filters.equal("id", "corr-5".toBson)).toFuture())) { case Seq(document) =>
         document shouldBe HaulierStatusDocument("corr-5", Created, instant.truncatedTo(MILLIS), instant.truncatedTo(MILLIS))
       }
     }

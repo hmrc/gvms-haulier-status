@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (val config: Configuration) {
 
-  val expireAfterSeconds:       Int    = config.get[Int]("mongodb.haulier-status.expireAfterSeconds")
+  val expireAfterSeconds:       Long   = config.get[Long]("mongodb.haulier-status.expireAfterSeconds")
   val initialDelaySeconds:      Int    = config.get[Int]("statusCheckScheduler.initialDelaySeconds")
   val intervalSeconds:          Int    = config.get[Int]("statusCheckScheduler.intervalSeconds")
   val limit:                    Int    = config.get[Int]("statusCheckScheduler.correlationIdsLimit")

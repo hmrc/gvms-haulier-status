@@ -41,7 +41,8 @@ object WartRemoverSettings {
         ListAppend,
         SeqApply,
         ThreadSleep,
-        While
+        While,
+        MutableDataStructures
       )
     }
 
