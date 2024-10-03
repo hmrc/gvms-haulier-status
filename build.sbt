@@ -25,9 +25,7 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
-  .settings(WartRemoverSettings.settings)
-  .settings( // fix scaladoc generation in jenkins
-    Compile / scalacOptions -= "utf8",
+  .settings(
     scalacOptions += "-language:postfixOps"
   )
 
