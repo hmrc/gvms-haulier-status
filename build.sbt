@@ -26,7 +26,8 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
   .settings(
-    scalacOptions += "-language:postfixOps"
+    scalacOptions += "-language:postfixOps",
+    scalacOptions += "-no-indent"
   )
 
 evictionErrorLevel := Level.Warn
