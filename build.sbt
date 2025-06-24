@@ -23,7 +23,6 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   )
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
   .settings(
     scalacOptions += "-language:postfixOps",
