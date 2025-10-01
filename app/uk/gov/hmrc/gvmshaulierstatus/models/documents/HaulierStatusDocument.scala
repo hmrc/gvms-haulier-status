@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.model.documents
+package uk.gov.hmrc.gvmshaulierstatus.models.documents
 
 import cats.Eq
 import cats.implicits.catsSyntaxEq
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument.timeFormatter
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.HaulierStatusDocument.timeFormatter
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.Status.Created
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.{Instant, ZoneId}

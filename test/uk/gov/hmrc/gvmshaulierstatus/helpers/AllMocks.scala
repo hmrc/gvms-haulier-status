@@ -22,11 +22,13 @@ import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.gvmshaulierstatus.services.HaulierStatusService
+import uk.gov.hmrc.http.client.RequestBuilder
 
 trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
   val mockCustomsServiceStatusConnector: CustomsServiceStatusConnector = mock[CustomsServiceStatusConnector]
   val mockHaulierStatusRepository:       HaulierStatusRepository       = mock[HaulierStatusRepository]
+  val mockRequestBuilder:                RequestBuilder                = mock[RequestBuilder]
   val mockHaulierStatusService:          HaulierStatusService          = mock[HaulierStatusService]
 
   override protected def beforeEach(): Unit =

@@ -50,4 +50,18 @@ class FixedSizeListSpec extends BaseSpec {
       fixedSizeList.getAll shouldBe List("two", "three", "four")
     }
   }
+
+  "isEmpty" should {
+    "return true when the buffer has no elements" in {
+      val fixedSizeList = new FixedSizeList[String](0)
+      fixedSizeList.isEmpty shouldBe true
+    }
+
+    "return false when the buffer has elements" in {
+      val fixedSizeList = new FixedSizeList[String](1)
+      fixedSizeList.add("one")
+      fixedSizeList.isEmpty shouldBe false
+
+    }
+  }
 }

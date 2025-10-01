@@ -22,10 +22,10 @@ import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.{MongoWriteException, ServerAddress, WriteError}
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
 import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseSpec
-import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
-import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
+import uk.gov.hmrc.gvmshaulierstatus.models.CorrelationId
+import uk.gov.hmrc.gvmshaulierstatus.models.State.{AVAILABLE, UNAVAILABLE}
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.Status.{Created, Received}
 import uk.gov.hmrc.http.HttpResponse
 
 import java.time.Instant
@@ -36,6 +36,17 @@ class HaulierStatusServiceSpec extends BaseSpec {
 
   trait Setup {
     val service = new HaulierStatusService(mockHaulierStatusRepository, mockCustomsServiceStatusConnector)
+  }
+
+  "initialise" should {
+    "successfully initialise the status to AVAILABLE" in new Setup {
+      when(mockCustomsServiceStatusConnector.updateStatus(anyString(), any())(any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      service.initialise().futureValue
+
+      verify(mockCustomsServiceStatusConnector).updateStatus(anyString(), same(AVAILABLE))(any())
+    }
   }
 
   "create" should {
