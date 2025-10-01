@@ -27,16 +27,15 @@ import uk.gov.hmrc.http.client.HttpClientV2
 
 import scala.concurrent.Future;
 
-
 class CustomsServiceStatusConnectorSpec extends BaseSpec {
 
   "updateStatus" should {
     "return the http response" in {
-      val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
-      val connector: CustomsServiceStatusConnector = new CustomsServiceStatusConnector(mockHttpClient, "http://localhost:0000")
+      val mockHttpClient: HttpClientV2                  = mock[HttpClientV2]
+      val connector:      CustomsServiceStatusConnector = new CustomsServiceStatusConnector(mockHttpClient, "http://localhost:0000")
 
-      val state = AVAILABLE.value
-      val serviceId = "haulier"
+      val state        = AVAILABLE.value
+      val serviceId    = "haulier"
       val httpResponse = HttpResponse(200, body = "ok")
 
       when(mockHttpClient.put(mEq(url"http://localhost:0000/customs-service-status/services/$serviceId/status"))(any[HeaderCarrier]))
