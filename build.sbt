@@ -15,15 +15,15 @@ lazy val microservice = Project("gvms-haulier-status", file("."))
   )
   .settings(
     routesImport ++= Seq(
-      "uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId"
+      "uk.gov.hmrc.gvmshaulierstatus.models.CorrelationId"
     )
   )
   .settings(
     scalafmtOnCompile := true
   )
   .configs(IntegrationTest)
-  .settings(integrationTestSettings(): _*)
-  .settings(CodeCoverageSettings.settings: _*)
+  .settings(integrationTestSettings() *)
+  .settings(CodeCoverageSettings.settings *)
   .settings(
     scalacOptions += "-language:postfixOps",
     scalacOptions += "-no-indent"

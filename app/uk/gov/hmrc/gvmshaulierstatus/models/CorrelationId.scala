@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.model
+package uk.gov.hmrc.gvmshaulierstatus.models
 
 import play.api.libs.json._
 import play.api.mvc.PathBindable

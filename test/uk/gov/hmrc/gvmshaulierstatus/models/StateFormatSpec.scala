@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.gvmshaulierstatus.model
+package uk.gov.hmrc.gvmshaulierstatus.models
 
 import play.api.libs.json._
 import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseSpec
-import uk.gov.hmrc.gvmshaulierstatus.model.State._
+import uk.gov.hmrc.gvmshaulierstatus.models.State._
 
 class StateFormatSpec extends BaseSpec {
 

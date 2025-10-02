@@ -17,9 +17,9 @@
 package uk.gov.hmrc.gvmshaulierstatus.repositories
 
 import org.mongodb.scala.model.Filters
-import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
+import uk.gov.hmrc.gvmshaulierstatus.models.CorrelationId
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.Status.{Created, Received}
 import uk.gov.hmrc.mongo.play.json.Codecs.JsonOps
 
 import java.time.temporal.ChronoUnit.MILLIS

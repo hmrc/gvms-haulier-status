@@ -24,9 +24,9 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates.{combine, set}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
-import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.{HaulierStatusDocument, Status}
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.Created
+import uk.gov.hmrc.gvmshaulierstatus.models.CorrelationId
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.{HaulierStatusDocument, Status}
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.Status.Created
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.Codecs._
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}

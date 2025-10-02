@@ -23,10 +23,10 @@ import play.api.Logging
 import uk.gov.hmrc.gvmshaulierstatus.config.AppConfig
 import uk.gov.hmrc.gvmshaulierstatus.connectors.CustomsServiceStatusConnector
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound, CreateHaulierStatusError, DeleteHaulierStatusError}
-import uk.gov.hmrc.gvmshaulierstatus.model.State.{AVAILABLE, UNAVAILABLE}
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.HaulierStatusDocument
-import uk.gov.hmrc.gvmshaulierstatus.model.documents.Status.{Created, Received}
-import uk.gov.hmrc.gvmshaulierstatus.model.{CorrelationId, State}
+import uk.gov.hmrc.gvmshaulierstatus.models.State.{AVAILABLE, UNAVAILABLE}
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.HaulierStatusDocument
+import uk.gov.hmrc.gvmshaulierstatus.models.documents.Status.{Created, Received}
+import uk.gov.hmrc.gvmshaulierstatus.models.{CorrelationId, State}
 import uk.gov.hmrc.gvmshaulierstatus.repositories.HaulierStatusRepository
 import uk.gov.hmrc.gvmshaulierstatus.utils.FixedSizeList
 import uk.gov.hmrc.http.HeaderCarrier

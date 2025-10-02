@@ -18,7 +18,7 @@ package uk.gov.hmrc.gvmshaulierstatus.connectors
 
 import play.api.libs.json.Json
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
-import uk.gov.hmrc.gvmshaulierstatus.model.State
+import uk.gov.hmrc.gvmshaulierstatus.models.State
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
 

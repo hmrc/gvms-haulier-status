@@ -26,7 +26,7 @@ import uk.gov.hmrc.gvmshaulierstatus.actions.AuthorisedAction
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError
 import uk.gov.hmrc.gvmshaulierstatus.error.HaulierStatusError.{CorrelationIdAlreadyExists, CorrelationIdNotFound}
 import uk.gov.hmrc.gvmshaulierstatus.helpers.BaseControllerSpec
-import uk.gov.hmrc.gvmshaulierstatus.model.CorrelationId
+import uk.gov.hmrc.gvmshaulierstatus.models.CorrelationId
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.*
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
